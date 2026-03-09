@@ -1,0 +1,1126 @@
+
+<file name="scanner2.html">
+
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNW1 — Yard Marshall Scanner</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+[data-theme="dark"]{
+    --bg:#0f1923;--bg2:#1a2634;--bg3:#243447;--card:#1e2d3d;--card2:#253849;
+    --accent:#ff9900;--accent2:#ffad33;--green:#00c48c;--green2:#00e6a0;
+    --red:#ff4757;--blue:#3b82f6;--purple:#a855f7;
+    --text:#e8edf2;--text2:#8b9bb4;--text3:#5a6f87;--border:rgba(255,255,255,0.06);
+    --header-bg:linear-gradient(135deg,#131d27,#1a2a3a);--input-bg:#151f2b;
+    --shadow:rgba(0,0,0,0.3);--hero-ok:linear-gradient(135deg,#00875a,#00c48c);
+    --hero-fail:linear-gradient(135deg,#c92a2a,#ff4757);
+    /* Done BY ALI ELMARZOUKY*/
+}
+[data-theme="light"]{
+    --bg:#f0f2f5;--bg2:#ffffff;--bg3:#e8ecf0;--card:#ffffff;--card2:#f5f7fa;
+    --accent:#e8850c;--accent2:#ff9900;--green:#0d9f6e;--green2:#10b981;
+    --red:#dc2626;--blue:#2563eb;--purple:#7c3aed;
+    --text:#1a1a2e;--text2:#4a5568;--text3:#8896a6;--border:rgba(0,0,0,0.08);
+    --header-bg:linear-gradient(135deg,#232f3e,#37475a);--input-bg:#f8f9fb;
+    --shadow:rgba(0,0,0,0.08);--hero-ok:linear-gradient(135deg,#059669,#10b981);
+    --hero-fail:linear-gradient(135deg,#dc2626,#ef4444);
+}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+.header{background:var(--header-bg);padding:0 28px;height:62px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo-area{display:flex;align-items:center;gap:12px}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),#e68a00);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#000;box-shadow:0 3px 12px rgba(255,153,0,0.3)}
+.logo-text{font-size:21px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-sub{font-size:10px;color:rgba(255,255,255,0.5);font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.hr{display:flex;align-items:center;gap:10px}
+.hbtn{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:7px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:11px;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:inherit}
+.hbtn:hover{background:rgba(255,255,255,0.2);transform:translateY(-1px)}
+.hbtn.pri{background:var(--accent);color:#000;border-color:var(--accent)}
+.hbtn.pri:hover{background:var(--accent2);box-shadow:0 4px 12px rgba(255,153,0,0.3)}
+.status-pill{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:600;color:var(--green);background:rgba(255,255,255,0.08)}
+.sdot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.clock{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.dbadge{font-size:10px;padding:4px 10px;border-radius:16px;font-weight:700;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)}
+.dbadge.on{background:rgba(0,196,140,0.2);color:var(--green)}
+.theme-toggle{background:none;border:1px solid rgba(255,255,255,0.15);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.theme-toggle:hover{background:rgba(255,255,255,0.1)}
+.stats-bar{max-width:1500px;margin:0 auto;padding:18px 22px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .3s}
+.stc:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}
+.sti{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sti.o{background:rgba(255,153,0,0.1)}.sti.g{background:rgba(0,196,140,0.1)}.sti.b{background:rgba(59,130,246,0.1)}.sti.p{background:rgba(168,85,247,0.1)}
+.stv{font-size:26px;font-weight:800;line-height:1;color:var(--text)}.stl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:3px}
+.main{max-width:1500px;margin:0 auto;padding:18px 22px;display:grid;grid-template-columns:1fr 360px;gap:18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:22px;transition:all .3s}
+.card:hover{border-color:rgba(255,153,0,0.1)}
+.ct{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:18px;display:flex;align-items:center;gap:9px}
+.ct .i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.sa{position:relative;margin-bottom:18px}
+.si{width:100%;padding:20px 22px 20px 52px;font-size:24px;font-weight:800;letter-spacing:3px;background:var(--input-bg);color:var(--text);border:2px solid var(--border);border-radius:13px;outline:none;transition:all .3s;font-family:'Inter',monospace}
+.si::placeholder{font-size:13px;letter-spacing:0;font-weight:400;color:var(--text3)}
+.si:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,153,0,0.08)}
+.sic{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.4}
+.res{display:none;margin-top:14px}.res.show{display:block;animation:ri .4s cubic-bezier(.16,1,.3,1)}
+@keyframes ri{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+.rh{padding:26px 28px;border-radius:15px 15px 0 0;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;color:#fff}
+.rh::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,0.1),transparent 60%)}
+.rh.ok{background:var(--hero-ok)}.rh.fail{background:var(--hero-fail)}
+.rhl,.rhr{position:relative;z-index:1}
+.rhl-l{font-size:10px;text-transform:uppercase;letter-spacing:2px;opacity:.7;font-weight:600;margin-bottom:5px}
+.rhl-w{font-size:40px;font-weight:900;letter-spacing:-1px}
+.rhr{text-align:right}.rhr-t{font-size:34px;font-weight:800}
+.rg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:0 0 15px 15px;overflow:hidden}
+.rc{background:var(--bg2);padding:13px 16px}
+.rc label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;display:block;margin-bottom:3px}
+.rc .v{font-size:15px;font-weight:700;color:var(--text)}
+.tips{margin-top:18px;background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px 18px;font-size:11px;color:var(--text3);display:flex;gap:10px;line-height:1.6}
+.tips strong{color:var(--accent)}
+.sidebar{display:flex;flex-direction:column;gap:14px}
+.wl{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+.wl::-webkit-scrollbar{width:3px}.wl::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+.wr{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:var(--bg2);border-radius:9px;border:1px solid transparent;cursor:pointer;transition:all .2s}
+.wr:hover{border-color:var(--accent);transform:translateX(3px)}
+.wr.act{border-color:var(--green);background:rgba(0,196,140,0.06)}
+.wn{font-weight:700;font-size:12px;color:var(--text)}.wt{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums}
+.wc{background:var(--bg3);color:var(--accent);padding:2px 9px;border-radius:16px;font-size:10px;font-weight:800}
+.wnow{font-size:8px;background:var(--green);color:#000;padding:2px 5px;border-radius:3px;font-weight:800;text-transform:uppercase;margin-left:5px}
+.ll{display:flex;flex-direction:column;gap:3px;max-height:320px;overflow-y:auto}
+.ll::-webkit-scrollbar{width:3px}.ll::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+.lr{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:var(--bg2);border-radius:7px;font-size:11px;animation:li .3s ease}
+@keyframes li{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+.lb{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+.lt{padding:2px 8px;border-radius:5px;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+.lt.ok{background:rgba(0,196,140,0.12);color:var(--green)}.lt.no{background:rgba(255,71,87,0.12);color:var(--red)}
+.ltm{color:var(--text3);font-size:10px;font-variant-numeric:tabular-nums}
+.cbtn{background:none;border:1px solid var(--border);padding:3px 10px;border-radius:5px;cursor:pointer;font-size:10px;color:var(--text3);font-family:inherit;transition:.2s}
+.cbtn:hover{border-color:var(--red);color:var(--red)}
+.em{text-align:center;padding:28px;color:var(--text3);font-size:12px}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}.ov.show{display:flex}
+.mod{background:var(--card);border:1px solid var(--border);border-radius:16px;width:760px;max-height:80vh;overflow-y:auto;padding:26px}
+.mod h3{margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:17px}
+.mc{background:var(--bg3);border:none;font-size:16px;cursor:pointer;color:var(--text3);width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:.2s}
+.mc:hover{background:var(--red);color:#fff}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);color:var(--accent);padding:9px 12px;font-size:9px;text-align:left;text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px}
+tr:hover td{background:var(--bg2)}
+.pw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:400;align-items:center;justify-content:center}
+.pw-overlay.show{display:flex}
+.pw-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:36px;width:400px;text-align:center}
+.pw-box h2{font-size:20px;margin-bottom:6px;color:var(--text)}
+.pw-box p{font-size:12px;color:var(--text3);margin-bottom:22px}
+.pw-input{width:100%;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:4px;text-align:center;background:var(--bg2);color:var(--text);border:2px solid var(--border);border-radius:10px;outline:none;font-family:inherit;transition:.3s}
+.pw-input:focus{border-color:var(--accent)}
+.pw-input.err{border-color:var(--red);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pw-btns{display:flex;gap:10px;margin-top:18px}
+.pw-btns button{flex:1;padding:12px;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;transition:.2s}
+.pw-ok{background:var(--accent);color:#000}.pw-ok:hover{background:var(--accent2)}
+.pw-cancel{background:var(--bg3);color:var(--text2)}.pw-cancel:hover{background:var(--card2)}
+.pw-err{color:var(--red);font-size:12px;font-weight:600;margin-top:10px;min-height:18px}
+.up{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center}.up.show{display:flex}
+.uc{background:var(--card);border:1px solid var(--border);border-radius:18px;width:820px;max-height:88vh;overflow-y:auto;padding:30px}
+.uc::-webkit-scrollbar{width:5px}.uc::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+.uh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.uh h2{font-size:20px;font-weight:800;color:var(--text)}.uh p{font-size:12px;color:var(--text3);margin-top:5px}
+.dz{border:2px dashed var(--text3);border-radius:14px;padding:44px 28px;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:18px;background:var(--bg2)}
+.dz:hover{border-color:var(--accent)}.dz.dg{border-color:var(--green);background:rgba(0,196,140,0.04)}
+.dz.hf{border-color:var(--green);border-style:solid;background:rgba(0,196,140,0.04)}
+.dzi{font-size:48px;margin-bottom:10px}.dzt{font-size:16px;font-weight:700;color:var(--text);margin-bottom:5px}.dzs{font-size:11px;color:var(--text3)}
+#rdst{display:none;padding:14px 18px;border-radius:11px;margin-bottom:16px;font-size:12px;line-height:1.7}
+.ps{display:none;margin-bottom:18px}.ps.show{display:block}
+.ps h3{margin-bottom:10px;font-size:14px;color:var(--text)}
+.pss{display:flex;gap:10px;margin-bottom:14px}
+.pst{background:var(--bg2);padding:12px 20px;border-radius:11px;border:1px solid var(--border);text-align:center;flex:1}
+.pst .n{font-size:28px;font-weight:900;line-height:1}.pst .l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:3px}
+.ptw{max-height:260px;overflow-y:auto;border-radius:9px;border:1px solid var(--border)}
+.ab{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--border)}
+.btn{padding:10px 22px;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;font-family:inherit}
+.ba{background:var(--green);color:#000;font-size:14px;padding:12px 28px}.ba:hover{background:var(--green2);transform:translateY(-1px)}
+.ba:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;transform:none}
+.bc{background:var(--bg3);color:var(--text2)}.bc:hover{color:var(--accent)}
+.bd{background:transparent;color:var(--red);border:1px solid rgba(255,71,87,0.3)}.bd:hover{background:rgba(255,71,87,0.08)}
+.toast{position:fixed;bottom:28px;right:28px;padding:14px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:13px;z-index:999;display:none;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,0.4)}
+.toast.show{display:flex;animation:ti .4s cubic-bezier(.16,1,.3,1)}
+.toast.success{background:linear-gradient(135deg,#00875a,#00c48c)}.toast.error{background:linear-gradient(135deg,#c92a2a,#ff4757)}
+@keyframes ti{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media(max-width:1100px){.main{grid-template-columns:1fr}.stats-bar{grid-template-columns:1fr 1fr}.uc{width:95%;padding:20px}}
+@media(max-width:640px){.stats-bar{grid-template-columns:1fr}.header{padding:0 14px}.hr{gap:5px;flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="header">
+    <div class="logo-area">
+        <div class="logo-icon" style="font-size:0;line-height:0">
+            <svg viewBox="0 0 36 36" width="26" height="26">
+                <text x="2" y="15" font-family="Arial" font-size="12" font-weight="900" fill="#000">a</text>
+                <text x="19" y="15" font-family="Arial" font-size="12" font-weight="900" fill="#000">z</text>
+                <path d="M6 22Q18 28 30 20" stroke="#000" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+                <path d="M27 17L30 20L27 22.5" stroke="#000" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div><div class="logo-text">DNW1</div><div class="logo-sub">Yard Marshall Dispatch</div></div>
+    </div>
+    <div class="hr">
+        <button class="hbtn pri" onclick="promptPassword()">📤 Upload</button>
+        <button class="hbtn" onclick="downloadTemplate()">📥 Template</button>
+        <span class="dbadge" id="dataBadge">Default Data</span>
+        <div class="status-pill"><span class="sdot"></span>Online</div>
+        <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+        <div class="clock" id="clock">--:--:--</div>
+    </div>
+</div>
+<div class="stats-bar">
+    <div class="stc"><div class="sti o">📦</div><div><div class="stv" id="stTotal">0</div><div class="stl">Total Routes</div></div></div>
+    <div class="stc"><div class="sti g">✅</div><div><div class="stv" id="stScanned">0</div><div class="stl">Scanned</div></div></div>
+    <div class="stc"><div class="sti b">🌊</div><div><div class="stv" id="stWaves">0</div><div class="stl">Waves</div></div></div>
+    <div class="stc"><div class="sti p">🕐</div><div><div class="stv" id="stNext">--</div><div class="stl">Current Wave</div></div></div>
+</div>
+<div class="main">
+    <div class="card">
+        <div class="ct"><div class="i" style="background:rgba(255,153,0,0.1)">📷</div>Badge Scanner</div>
+        <div class="sa"><span class="sic">🔍</span><input class="si" id="scanInput" placeholder="Scan badge barcode here…" autofocus autocomplete="off"></div>
+        <div class="res" id="result">
+            <div class="rh" id="resTop">
+                <div class="rhl"><div class="rhl-l">Assigned Wave</div><div class="rhl-w" id="resWave">--</div></div>
+                <div class="rhr"><div class="rhl-l">Dispatch Time</div><div class="rhr-t" id="resTime">--:--</div></div>
+            </div>
+            <div class="rg">
+                <div class="rc"><label>Badge ID</label><div class="v" id="resBadge">--</div></div>
+                <div class="rc"><label>Transporter</label><div class="v" id="resTrans">--</div></div>
+                <div class="rc"><label>Route</label><div class="v" id="resRoute">--</div></div>
+                <div class="rc"><label>Location</label><div class="v" id="resLoc">--</div></div>
+                <div class="rc"><label>DSP</label><div class="v" id="resDSP">--</div></div>
+                <div class="rc"><label>Status</label><div class="v" id="resStatus">--</div></div>
+            </div>
+        </div>
+        <div class="tips"><span style="font-size:18px;flex-shrink:0">💡</span><div><strong>Scan badge</strong> → info appears. <strong>Esc</strong> to clear. Upload reads all sheets automatically and cross-references data.</div></div>
+    </div>
+    <div class="sidebar">
+        <div class="card"><div class="ct"><div class="i" style="background:rgba(59,130,246,0.1)">🌊</div>Wave Schedule</div><div class="wl" id="waveList"></div></div>
+        <div class="card" style="flex:1"><div class="ct" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:9px"><span class="i" style="background:rgba(168,85,247,0.1)">📋</span>Scan History</span><button class="cbtn" onclick="clearLog()">Clear</button></div><div class="ll" id="logList"><div class="em">No scans yet</div></div></div>
+    </div>
+</div>
+<div class="ov" id="overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="mod"><h3><span id="modalTitle">Wave</span><button class="mc" onclick="document.getElementById('overlay').classList.remove('show')">✕</button></h3>
+    <table><thead><tr><th>#</th><th>Badge</th><th>Transporter</th><th>Route</th><th>Location</th><th>DSP</th></tr></thead><tbody id="modalBody"></tbody></table></div>
+</div>
+<div class="pw-overlay" id="pwOverlay">
+    <div class="pw-box">
+        <div style="font-size:40px;margin-bottom:12px">🔐</div>
+        <h2>Upload Access</h2>
+        <p>Enter the station password to upload data</p>
+        <input class="pw-input" id="pwInput" type="password" placeholder="••••" maxlength="20" autocomplete="off">
+        <div class="pw-err" id="pwErr"></div>
+        <div class="pw-btns">
+            <button class="pw-cancel" onclick="closePw()">Cancel</button>
+            <button class="pw-ok" onclick="checkPw()">🔓 Unlock</button>
+        </div>
+    </div>
+</div>
+<div class="up" id="uploadPanel">
+    <div class="uc">
+        <div class="uh"><div><h2>📤 Upload Daily Data</h2><p>Drop your Excel file. All sheets are read and cross-referenced automatically.</p></div><button class="mc" onclick="closeUpload()">✕</button></div>
+        <div class="dz" id="dropZone" onclick="document.getElementById('excelFile').click()"
+             ondragover="event.preventDefault();this.classList.add('dg')" ondragleave="this.classList.remove('dg')"
+             ondrop="event.preventDefault();this.classList.remove('dg');handleDrop(event)">
+            <div class="dzi" id="dropIcon">📁</div>
+            <div class="dzt" id="dropTitle">Drop your file here or click to browse</div>
+            <div class="dzs" id="dropSub">Supports .xlsx, .xls, .csv</div>
+            <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(event)">
+        </div>
+        <div id="rdst"></div>
+        <div class="ps" id="previewSection">
+            <h3>👁️ Data Preview</h3>
+            <div class="pss" id="previewStats"></div>
+            <div class="ptw"><table><thead><tr><th>#</th><th>Badge</th><th>Transporter</th><th>Wave</th><th>Time</th><th>Route</th><th>Location</th><th>DSP</th></tr></thead><tbody id="previewBody"></tbody></table></div>
+        </div>
+        <div class="ab">
+            <div style="display:flex;gap:8px"><button class="btn bc" onclick="closeUpload()">Cancel</button><button class="btn bd" onclick="clearSavedData()">🗑️ Reset</button></div>
+            <button class="btn ba" id="applyBtn" disabled onclick="applyData()">✅ Apply Data</button>
+        </div>
+    </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+    const CLOUD_URL = "https://api.npoint.io/b01202287293f1a6c0b6";
+// ===== DEFAULT DATA =====
+const DEFAULT_BADGE_MAP = {
+"12479373":{id:"A3N94EOMBCCWSH",wave:"SA Early",t:0.2917,route:"SA_A33",loc:"STG-C14",dsp:"H&G"},
+"12721685":{id:"A54F48QY3FX4L",wave:"SA Early",t:0.2917,route:"SA_A34",loc:"STG-B02",dsp:"H&G"},
+"12049684":{id:"A1L1I86QLVAR0M",wave:"SA Early",t:0.2917,route:"SA_A1",loc:"STG-C06",dsp:"FRLG"},
+"13052194":{id:"A16VCQQYGR8828",wave:"SA Early",t:0.2917,route:"SA_A2",loc:"STG-B04",dsp:"FRLG"},
+"14303579":{id:"A2CY8NTFW512NN",wave:"SA Early",t:0.2917,route:"SA_A3",loc:"STG-C08",dsp:"ELGM"},
+"12913247":{id:"AM7AHK7CY9687",wave:"SA Early",t:0.2917,route:"SA_A7",loc:"STG-C13",dsp:"ELGM"},
+"11814798":{id:"A3AUEUNZEO1CTL",wave:"SA Early",t:0.2917,route:"SA_A11",loc:"STG-B03",dsp:"EMBH"},
+"11875729":{id:"A1OGL94VCG6HBZ",wave:"SA Early",t:0.2917,route:"SA_A13",loc:"STG-C15",dsp:"EMBH"},
+"11636700":{id:"A2WZ6A88XJRYNC",wave:"SA Early",t:0.2917,route:"SA_A12",loc:"STG-B01",dsp:"EMBH"},
+"11777514":{id:"A3E86RPTZVJT2B",wave:"SA Early",t:0.3021,route:"SA_A4",loc:"STG-C11",dsp:"ELGM"},
+"12093507":{id:"AO69SWW35WX6P",wave:"SA Early",t:0.3021,route:"SA_A5",loc:"STG-C04",dsp:"ELGM"},
+"11263833":{id:"A2JUTL257VG819",wave:"SA Early",t:0.3021,route:"SA_A6",loc:"STG-C12",dsp:"ELGM"},
+"14720280":{id:"A1VKQEQIOOS6SJ",wave:"SA Early",t:0.3021,route:"SA_A8",loc:"STG-B11",dsp:"ELGM"},
+"14180705":{id:"A2GA4SYC7SSO6C",wave:"SA Early",t:0.3021,route:"SA_A9",loc:"STG-B06",dsp:"ELGM"},
+"13801490":{id:"A2X2ZNBL5VH8ER",wave:"SA Early",t:0.3021,route:"SA_A10",loc:"STG-B05",dsp:"ELGM"},
+"13964537":{id:"A1X926A6R6SSH4",wave:"Welle 1",t:0.4236,route:"CA_A50",loc:"STG-C.12",dsp:"FRLG"},
+"14687469":{id:"A17PZ1SMJMRK3H",wave:"Welle 1",t:0.4236,route:"CA_A53",loc:"STG-C.10",dsp:"FRLG"},
+"13438188":{id:"A1371X5WXJQ6RB",wave:"Welle 1",t:0.4236,route:"CA_A54",loc:"STG-C.11",dsp:"FRLG"},
+"12024080":{id:"AHO17KDPI4YKZ",wave:"Welle 1",t:0.4236,route:"CA_A57",loc:"STG-B.5",dsp:"FRLG"},
+"14616049":{id:"A2U24QWZWUFKOF",wave:"Welle 1",t:0.4236,route:"CA_A56",loc:"STG-B.4",dsp:"FRLG"},
+"14643285":{id:"A1I69101E3CTLS",wave:"Welle 1",t:0.4236,route:"CA_A59",loc:"STG-B.3",dsp:"FRLG"},
+"14646699":{id:"A3IEDYOL50F3GZ",wave:"Welle 1",t:0.4236,route:"CA_A58",loc:"STG-B.6",dsp:"FRLG"},
+"13824922":{id:"A2BSZ9URH1AHII",wave:"Welle 1",t:0.4236,route:"CA_A39",loc:"STG-C.6",dsp:"FRLG"},
+"13696115":{id:"A2RN2T8OU0ZZ6Z",wave:"Welle 1",t:0.4236,route:"CA_A31",loc:"STG-B.7",dsp:"FRLG"},
+"13696357":{id:"A27I1X85K7Y0YD",wave:"Welle 1",t:0.4236,route:"CA_A33",loc:"STG-C.7",dsp:"FRLG"},
+"12263884":{id:"A1XS7U0N4VM3FY",wave:"Welle 1",t:0.4236,route:"CA_A32",loc:"STG-B.8",dsp:"FRLG"},
+"13819824":{id:"A2MJ5CRQN111G0",wave:"Welle 1",t:0.4236,route:"CA_A35",loc:"STG-C.8",dsp:"FRLG"},
+"14745344":{id:"APG2OYZ2OMOR6",wave:"Welle 1",t:0.4236,route:"CA_A37",loc:"STG-C.5",dsp:"FRLG"},
+"15059463":{id:"A10CWF94TCLFQW",wave:"Welle 1",t:0.4236,route:"CA_A36",loc:"STG-C.9",dsp:"FRLG"},
+"354525":{id:"AEL9T6OY4M4BC",wave:"Welle 1",t:0.4236,route:"CA_A49",loc:"STG-C.14",dsp:"FRLG"},
+"12164305":{id:"A2P061L79YH7FE",wave:"Welle 1",t:0.4236,route:"CA_A40",loc:"STG-C.1",dsp:"FRLG"},
+"12046822":{id:"A3M114TOUG3294",wave:"Welle 1",t:0.4236,route:"CA_A42",loc:"STG-C.3",dsp:"FRLG"},
+"11473129":{id:"A94OXI0UE8ETM",wave:"Welle 1",t:0.4236,route:"CA_A41",loc:"STG-C.2",dsp:"FRLG"},
+"14721291":{id:"AHQA5CJX1K187",wave:"Welle 1",t:0.4236,route:"CA_A44",loc:"STG-C.15",dsp:"FRLG"},
+"12302370":{id:"A2I6M8UYTJNAX9",wave:"Welle 1",t:0.4236,route:"CA_A43",loc:"STG-C.4",dsp:"FRLG"},
+"14258108":{id:"A1NPZF7GLCUF5C",wave:"Welle 1",t:0.4236,route:"CA_A46",loc:"STG-B.1",dsp:"FRLG"},
+"13472403":{id:"A7TDF7OX1CJCG",wave:"Welle 1",t:0.4236,route:"CA_A45",loc:"STG-B.9",dsp:"FRLG"},
+"12718049":{id:"AR2HY7KZBDEDO",wave:"Welle 1",t:0.4236,route:"CA_A48",loc:"STG-C.13",dsp:"FRLG"},
+"12836581":{id:"ATLE2JWG0JSFZ",wave:"Welle 1",t:0.4236,route:"CA_A47",loc:"STG-B.2",dsp:"FRLG"}
+};
+
+// ===== STATE =====
+let BADGE_MAP={},WAVES=[],parsedExcelData=null,scanCount=0,scanLog=[];
+// ===== CLOUD SYNC =====
+function saveToCloud(data) {
+    return fetch(CLOUD_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            badges: data,
+            uploadedAt: new Date().toISOString(),
+            count: Object.keys(data).length
+        })
+    })
+    .then(r => { console.log('☁️ Saved to cloud'); return true; })
+    .catch(err => { console.error('❌ Cloud failed:', err); return false; });
+}
+
+function loadFromCloud() {
+    return fetch(CLOUD_URL)
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.badges && Object.keys(data.badges).length > 0) return data;
+            return null;
+        })
+        .catch(() => null);
+}
+
+// ===== THEME =====
+function toggleTheme(){
+    const html=document.documentElement;
+    const isDark=html.getAttribute('data-theme')==='dark';
+    html.setAttribute('data-theme',isDark?'light':'dark');
+    document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';
+    localStorage.setItem('dnw1_theme',isDark?'light':'dark');
+}
+
+// ===== PASSWORD =====
+function promptPassword(){
+    document.getElementById('pwOverlay').classList.add('show');
+    const inp=document.getElementById('pwInput');inp.value='';inp.classList.remove('err');
+    document.getElementById('pwErr').textContent='';
+    setTimeout(()=>inp.focus(),100);
+}
+function closePw(){document.getElementById('pwOverlay').classList.remove('show');setTimeout(()=>scanInput.focus(),100)}
+function checkPw(){
+    const val=document.getElementById('pwInput').value.trim();
+    if(val==='DNW1'){closePw();openUpload()}
+    else{document.getElementById('pwInput').classList.add('err');document.getElementById('pwErr').textContent='❌ Wrong password!';setTimeout(()=>document.getElementById('pwInput').classList.remove('err'),400)}
+}
+document.addEventListener('keydown',function(e){
+    if(document.getElementById('pwOverlay').classList.contains('show')){
+        if(e.key==='Enter')checkPw();if(e.key==='Escape')closePw();
+    }
+});
+
+// ===== TIME HELPERS =====
+function parseTime(raw){
+    if(raw==null||raw==='')return 0;
+    if(raw instanceof Date)return(raw.getHours()+raw.getMinutes()/60)/24;
+    if(typeof raw==='number'){
+        if(raw>=0&&raw<1)return raw;
+        if(raw>=1&&raw<24)return raw/24;
+        if(raw>=100&&raw<=2400)return(Math.floor(raw/100)+(raw%100)/60)/24;
+        // Excel serial date number (e.g. 44000.4375)
+        if(raw>100){const d=new Date((raw-25569)*86400*1000);return(d.getHours()+d.getMinutes()/60)/24}
+        return 0;
+    }
+    const s=String(raw).trim();
+    if(s.includes(':')){const p=s.split(':');return((parseInt(p[0])||0)+(parseInt(p[1])||0)/60)/24}
+    const n=parseFloat(s);if(!isNaN(n)){if(n>=0&&n<1)return n;if(n>=1&&n<24)return n/24}
+    return 0;
+}
+function timeStr(t){if(!t)return'--:--';let h=Math.floor(t*24),m=Math.round((t*24-h)*60);if(m===60){h++;m=0}return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')}
+function nowDec(){const n=new Date();return(n.getHours()+n.getMinutes()/60+n.getSeconds()/3600)/24}
+function nowStr(){const n=new Date();return[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':')}
+
+// ===== UI HELPERS =====
+function showSt(html,type){
+    const el=document.getElementById('rdst');el.style.display='block';
+    el.style.background=type==='err'?'rgba(255,71,87,0.1)':type==='ok'?'rgba(0,196,140,0.1)':'rgba(255,153,0,0.1)';
+    el.style.color=type==='err'?'var(--red)':type==='ok'?'var(--green)':'var(--accent)';
+    el.style.border='1px solid '+(type==='err'?'rgba(255,71,87,0.2)':type==='ok'?'rgba(0,196,140,0.2)':'rgba(255,153,0,0.2)');
+    el.innerHTML=html;
+}
+function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.classList.remove('show'),4000)}
+
+// ===== CLEAN BADGE NUMBER =====
+function cleanBadge(raw){
+    let b=String(raw||'').trim();
+    if(b.endsWith('.0'))b=b.slice(0,-2);
+    b=b.replace(/^0+/,'')||b;
+    if(!b||b==='undefined'||b==='null'||b==='NaN'||b==='0'||b==='N/A'||b==='OFFBOARDED')return null;
+    return b;
+}
+
+// ===== CLEAN DSP NAME =====
+function cleanDSP(raw){
+    const s=String(raw||'').trim();
+    if(!s||s==='0')return'';
+    // "DSP:FRLG" → "FRLG", "Friends Logistik GmbH" → "FRLG", etc.
+    if(s.startsWith('DSP:'))return s.substring(4).trim();
+    // Map full company names to short codes
+    const lower=s.toLowerCase();
+    if(lower.includes('friends logistik')||lower==='frlg')return'FRLG';
+    if(lower.includes('ex-log')||lower.includes('exlog')||lower==='elgm')return'ELGM';
+    if(lower.includes('eml ')||lower.includes('eml gmbh')||lower==='embh')return'EMBH';
+    if(lower.includes('h&g')||lower.includes('h & g'))return'H&G';
+    if(lower.includes('fast and safe')||lower.includes('i & a')||lower.includes('i&a')||lower==='iafs')return'IAFS';
+    if(lower.includes('lplg')||lower==='lplg')return'LPLG';
+    return s;
+}
+
+// =========================================================
+// MASTER PARSER — reads ALL sheets and cross-references
+// =========================================================
+function parseWorkbook(workbook){
+    const sheets={};
+    workbook.SheetNames.forEach(name=>{
+        sheets[name]=XLSX.utils.sheet_to_json(workbook.Sheets[name],{defval:''});
+    });
+
+    console.log('Sheet names:',workbook.SheetNames);
+    workbook.SheetNames.forEach(n=>console.log('Sheet "'+n+'" rows:',sheets[n].length,sheets[n].length>0?Object.keys(sheets[n][0]):'empty'));
+
+    // ===== STEP 1: Find "Wellen MO-SA" sheet (the main wave assignment sheet) =====
+    // Columns: Transporter ID | BadgeID | Dispatch Time | Dispatch time Zahl | Welle
+    let wellenSheet=null, wellenName='';
+    for(const name of workbook.SheetNames){
+        const lower=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+        if(lower.includes('wellen')||lower.includes('wave')){
+            if(sheets[name].length>0){wellenSheet=sheets[name];wellenName=name;break}
+        }
+    }
+
+    // ===== STEP 2: Find "Input Form" sheet (has Route, Location, Time, DSP, Code) =====
+    // Columns: Route | Code | Dispatch Time | Route ID | Location | Status | Progress | Type
+    let inputSheet=null, inputName='';
+    for(const name of workbook.SheetNames){
+        const lower=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+        if(lower.includes('input')||lower.includes('form')){
+            if(sheets[name].length>0){inputSheet=sheets[name];inputName=name;break}
+        }
+    }
+
+    // ===== STEP 3: Find "Transporter" sheet (has Transporter ID, DSP full name, Badge) =====
+    // Columns: col A = Transporter ID | B = Station code | C = Executed company name | D = shortcode | E = Badge Barcode
+    let transporterSheet=null, transporterName='';
+    for(const name of workbook.SheetNames){
+        const lower=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+        if(lower.includes('transporter')&&!lower.includes('id')){
+            if(sheets[name].length>0){transporterSheet=sheets[name];transporterName=name;break}
+        }
+    }
+
+    console.log('Detected sheets — Wellen:',wellenName,'Input:',inputName,'Transporter:',transporterName);
+
+    // ===== STEP 4: Build lookup tables =====
+    const result={};
+    let valid=0,skipped=0;
+    const wavesFound=new Set();
+
+    // ----- Strategy A: Use "Wellen MO-SA" as primary (best source) -----
+    if(wellenSheet&&wellenSheet.length>0){
+        console.log('Using Wellen sheet. Headers:',Object.keys(wellenSheet[0]));
+
+        // Find column names dynamically
+        const wHeaders=Object.keys(wellenSheet[0]);
+        const wColTransporter=findHeader(wHeaders,['transporter id','transporterid','transporter']);
+        const wColBadge=findHeader(wHeaders,['badgeid','badge','badge id','badge barcode','badgebarcode']);
+        const wColTime=findHeader(wHeaders,['dispatch time','dispatchtime','dispatch tim','dispath time','zeit','time','uhrzeit']);
+        const wColTimeNum=findHeader(wHeaders,['dispatch time zah','dispatch time zahl','dispatchtime zahl','dispatch time za','zeit zahl','time number']);
+        const wColWave=findHeader(wHeaders,['welle','wave','wellen']);
+
+        console.log('Wellen columns:',{wColTransporter,wColBadge,wColTime,wColTimeNum,wColWave});
+
+        // Build Input Form lookup: transporter ID → {route, location, dsp, code}
+        const inputLookup={};
+        if(inputSheet&&inputSheet.length>0){
+            const iHeaders=Object.keys(inputSheet[0]);
+            const iColRoute=findHeader(iHeaders,['route','route id','routeid']);
+            const iColCode=findHeader(iHeaders,['code','route id','routeid']);
+            const iColLoc=findHeader(iHeaders,['location','loc','staging','standort','position']);
+            const iColType=findHeader(iHeaders,['type','dsp','typ']);
+            const iColTime=findHeader(iHeaders,['dispatch time','dispatchtime','dispatch tim','time','zeit']);
+            // In Input Form, the transporter ID might be in a column, or we match by Code
+            // Looking at screenshot: Route | Code | Dispatch Time | Route ID | Location | Status | Progress | Type
+            // Code column has "7372604-26" format, we also see transporter ID in a separate column
+            const iColTransporter=findHeader(iHeaders,['driver','transporter','transporter id','transporterid']);
+
+            console.log('Input columns:',{iColRoute,iColCode,iColLoc,iColType,iColTime,iColTransporter});
+
+            inputSheet.forEach(row=>{
+                const route=iColRoute?String(row[iColRoute]||'').trim():'';
+                const code=iColCode?String(row[iColCode]||'').trim():'';
+                const loc=iColLoc?String(row[iColLoc]||'').trim():'';
+                const dspRaw=iColType?String(row[iColType]||'').trim():'';
+                const dsp=cleanDSP(dspRaw);
+                if(route){
+                    inputLookup[route]={route,loc,dsp,code};
+                }
+            });
+            console.log('Input lookup entries:',Object.keys(inputLookup).length);
+        }
+
+        // Build Transporter lookup: transporter ID → {dsp, badge}
+        const transporterLookup={};
+        if(transporterSheet&&transporterSheet.length>0){
+            const tHeaders=Object.keys(transporterSheet[0]);
+            // Columns: A=TransporterID (first col), C=company name, D=shortcode, E=badge
+            // The first column might not have a proper header
+            const tColId=tHeaders[0]; // First column is always transporter ID
+            const tColCompany=findHeader(tHeaders,['executed company name','company','firma','executed company']);
+            const tColShortcode=findHeader(tHeaders,['executed company shortcode','shortcode','dsp','company shortcode']);
+            const tColBadge=findHeader(tHeaders,['badge barcode','badge','badgeid','badge id','barcode']);
+
+            console.log('Transporter columns:',{tColId,tColCompany,tColShortcode,tColBadge});
+
+            transporterSheet.forEach(row=>{
+                const tid=String(row[tColId]||'').trim();
+                if(!tid)return;
+                const shortcode=tColShortcode?String(row[tColShortcode]||'').trim():'';
+                const company=tColCompany?String(row[tColCompany]||'').trim():'';
+                const badge=tColBadge?cleanBadge(row[tColBadge]):null;
+                const dsp=cleanDSP(shortcode||company);
+                transporterLookup[tid]={dsp,badge,company:shortcode||company};
+            });
+            console.log('Transporter lookup entries:',Object.keys(transporterLookup).length);
+        }
+
+        // Now process Wellen sheet — this has: TransporterID, BadgeID, Time, Wave
+        // We need to match with Input Form to get Route and Location
+        // The Input Form is ordered by route, and routes are assigned to transporters in order
+
+        // First pass: build list of all wellen entries with their transporter IDs
+        const wellenEntries=[];
+        wellenSheet.forEach(row=>{
+            const transporter=wColTransporter?String(row[wColTransporter]||'').trim():'';
+            const badgeRaw=wColBadge?row[wColBadge]:'';
+            const badge=cleanBadge(badgeRaw);
+            const timeRaw=wColTime?row[wColTime]:null;
+            const timeNum=wColTimeNum?row[wColTimeNum]:null;
+            const wave=wColWave?String(row[wColWave]||'').trim():'';
+
+            if(!badge&&!transporter){skipped++;return}
+            if(!wave){skipped++;return}
+
+            // Parse time — prefer the numeric column if available
+            let t=0;
+            if(timeNum!==null&&timeNum!==''){t=parseTime(timeNum)}
+            else if(timeRaw!==null){t=parseTime(timeRaw)}
+
+            wellenEntries.push({transporter,badge,t,wave});
+        });
+
+        // Build route assignment: match transporter IDs from Input Form
+        // Input Form has routes in order with Code like "7372604-XX"
+        // We need to link transporter → route
+        // Strategy: Build a list from Input Form with transporter IDs
+        const routeByTransporter={};
+        if(inputSheet&&inputSheet.length>0){
+            const iHeaders=Object.keys(inputSheet[0]);
+            const iColRoute=findHeader(iHeaders,['route','route id']);
+            const iColLoc=findHeader(iHeaders,['location','loc','staging','standort']);
+            const iColType=findHeader(iHeaders,['type','dsp','typ']);
+            const iColDriver=findHeader(iHeaders,['driver','transporter','transporter id']);
+            const iColProgress=findHeader(iHeaders,['progress']);
+
+            // The Input Form might have transporter ID in "Progress" or "Driver" column
+            // From screenshot: Progress has "A3I9FHO7USF..." format = transporter IDs!
+            // Let's check — Progress column has values like "0/244" ... no that's package count
+            // Looking more carefully: column G = "Type" has "DSP:FRLG"
+            // Column H seems to have the transporter ID (partially visible)
+
+            // Actually from the screenshot, the columns are:
+            // A=Route, B=Code, C=Dispatch Time, D=Route ID, E=Location, F=Status, G=Progress, H=Type, I=Driver
+            // And we can see transporter IDs in column H (like A3I9FHO7USF...)
+            // Wait — those ARE the transporter IDs! Column right after Progress
+
+            // Let's try to find the transporter column by checking for amazon-style IDs
+            let transColForInput=null;
+            for(const h of iHeaders){
+                if(transColForInput)break;
+                const samples=inputSheet.slice(0,10).map(r=>String(r[h]||''));
+                const hasAmzIds=samples.filter(v=>/^A[A-Z0-9]{8,}/.test(v)).length;
+                if(hasAmzIds>=3)transColForInput=h;
+            }
+
+            // Also check the column that looks like it contains transporter IDs by scanning all columns
+            if(!transColForInput){
+                for(const h of iHeaders){
+                    const val=String(inputSheet[0][h]||'');
+                    if(/^A[A-Z0-9]{10,}/.test(val)){transColForInput=h;break}
+                }
+            }
+
+            console.log('Input Form transporter column:',transColForInput);
+
+            if(transColForInput){
+                inputSheet.forEach(row=>{
+                    const tid=String(row[transColForInput]||'').trim();
+                    const route=iColRoute?String(row[iColRoute]||'').trim():'';
+                    const loc=iColLoc?String(row[iColLoc]||'').trim():'';
+                    const dspRaw=iColType?String(row[iColType]||'').trim():'';
+                    if(tid&&route){
+                        // Clean the transporter ID (might have extra text)
+                        const cleanTid=tid.replace(/[^A-Z0-9]/gi,'');
+                        routeByTransporter[cleanTid]={route,loc,dsp:cleanDSP(dspRaw)};
+                    }
+                });
+            }
+
+            // Also build route lookup by matching order within same wave/time
+            console.log('Route by transporter entries:',Object.keys(routeByTransporter).length);
+        }
+
+        // Now combine everything
+        wellenEntries.forEach(entry=>{
+            const badge=entry.badge;
+            const tid=entry.transporter;
+            if(!badge){skipped++;return}
+
+            wavesFound.add(entry.wave);
+
+            // Find route info
+            let route='',loc='',dsp='';
+
+            // Method 1: Direct transporter → route lookup
+            const cleanTid=tid.replace(/[^A-Z0-9]/gi,'');
+            if(routeByTransporter[cleanTid]){
+                route=routeByTransporter[cleanTid].route;
+                loc=routeByTransporter[cleanTid].loc;
+                dsp=routeByTransporter[cleanTid].dsp;
+            }
+
+            // Method 2: Partial match (transporter ID might be truncated)
+            if(!route&&cleanTid.length>=8){
+                for(const[key,val] of Object.entries(routeByTransporter)){
+                    if(key.startsWith(cleanTid.substring(0,10))||cleanTid.startsWith(key.substring(0,10))){
+                        route=val.route;loc=val.loc;dsp=val.dsp;break;
+                    }
+                }
+            }
+
+            // Method 3: From transporter lookup
+            if(!dsp&&transporterLookup[tid]){
+                dsp=transporterLookup[tid].dsp;
+            }
+
+            result[badge]={
+                id:tid,
+                wave:entry.wave,
+                t:entry.t,
+                route:route,
+                loc:loc,
+                dsp:dsp
+            };
+            valid++;
+        });
+    }
+
+    // ----- Strategy B: Fallback — try Input Form directly -----
+    if(valid===0&&inputSheet&&inputSheet.length>0){
+        console.log('Fallback: Using Input Form directly');
+        const iHeaders=Object.keys(inputSheet[0]);
+        const iColRoute=findHeader(iHeaders,['route']);
+        const iColCode=findHeader(iHeaders,['code']);
+        const iColTime=findHeader(iHeaders,['dispatch time','time','dispatch tim']);
+        const iColLoc=findHeader(iHeaders,['location','loc','staging']);
+        const iColType=findHeader(iHeaders,['type','dsp']);
+
+        // Find transporter ID column
+        let iColTrans=null;
+        for(const h of iHeaders){
+            const samples=inputSheet.slice(0,10).map(r=>String(r[h]||''));
+            if(samples.filter(v=>/^A[A-Z0-9]{8,}/.test(v)).length>=3){iColTrans=h;break}
+        }
+
+        // We need badge numbers — check transporter sheet
+        if(iColTrans&&transporterSheet){
+            const tHeaders=Object.keys(transporterSheet[0]);
+            const tColId=tHeaders[0];
+            const tColBadge=findHeader(tHeaders,['badge barcode','badge','badgeid']);
+            const tColShortcode=findHeader(tHeaders,['executed company shortcode','shortcode','dsp']);
+            const tColCompany=findHeader(tHeaders,['executed company name','company']);
+
+            const badgeByTransporter={};
+            const dspByTransporter={};
+            transporterSheet.forEach(row=>{
+                const tid=String(row[tColId]||'').trim();
+                const badge=tColBadge?cleanBadge(row[tColBadge]):null;
+                const sc=tColShortcode?String(row[tColShortcode]||'').trim():'';
+                const co=tColCompany?String(row[tColCompany]||'').trim():'';
+                if(tid&&badge)badgeByTransporter[tid]=badge;
+                if(tid)dspByTransporter[tid]=cleanDSP(sc||co);
+            });
+
+            inputSheet.forEach(row=>{
+                const tid=iColTrans?String(row[iColTrans]||'').trim():'';
+                const route=iColRoute?String(row[iColRoute]||'').trim():'';
+                const loc=iColLoc?String(row[iColLoc]||'').trim():'';
+                const dspRaw=iColType?String(row[iColType]||'').trim():'';
+                const t=iColTime?parseTime(row[iColTime]):0;
+
+                const cleanTid=tid.replace(/[^A-Z0-9]/gi,'');
+                let badge=badgeByTransporter[cleanTid];
+
+                // Partial match
+                if(!badge&&cleanTid.length>=8){
+                    for(const[k,v] of Object.entries(badgeByTransporter)){
+                        if(k.includes(cleanTid.substring(0,10))||cleanTid.includes(k.substring(0,10))){badge=v;break}
+                    }
+                }
+
+                if(!badge||!route)return;
+
+                const wave=guessWave(t);
+                wavesFound.add(wave);
+
+                result[badge]={
+                    id:cleanTid,
+                    wave:wave,
+                    t:t,
+                    route:route,
+                    loc:loc,
+                    dsp:cleanDSP(dspRaw)||(dspByTransporter[cleanTid]||'')
+                };
+                valid++;
+            });
+        }
+    }
+
+    // ----- Strategy C: Last resort — try any sheet with badge-like + wave-like columns -----
+    if(valid===0){
+        console.log('Last resort: scanning all sheets for badge+wave data');
+        for(const name of workbook.SheetNames){
+            const rows=sheets[name];
+            if(!rows||rows.length<3)continue;
+            const headers=Object.keys(rows[0]);
+
+            let colBadge=null,colWave=null,colTime=null,colRoute=null,colLoc=null,colDsp=null,colId=null;
+
+            for(const h of headers){
+                const low=h.toLowerCase().replace(/[^a-z0-9]/g,'');
+                if(!colBadge&&(low.includes('badge')||low.includes('barcode')))colBadge=h;
+                if(!colWave&&(low.includes('welle')||low.includes('wave')))colWave=h;
+                if(!colTime&&(low.includes('time')||low.includes('zeit')||low.includes('dispatch')))colTime=h;
+                if(!colRoute&&(low.includes('route')||low.includes('tour')))colRoute=h;
+                if(!colLoc&&(low.includes('location')||low.includes('loc')||low.includes('staging')||low.includes('standort')))colLoc=h;
+                if(!colDsp&&(low.includes('dsp')||low.includes('type')||low.includes('company')||low.includes('firma')))colDsp=h;
+                if(!colId&&(low.includes('transporter')||low.includes('login')))colId=h;
+            }
+
+            if(colBadge&&colWave){
+                rows.forEach(row=>{
+                    const badge=cleanBadge(row[colBadge]);
+                    const wave=colWave?String(row[colWave]||'').trim():'';
+                    if(!badge||!wave)return;
+                    wavesFound.add(wave);
+                    result[badge]={
+                        id:colId?String(row[colId]||'').trim():'',
+                        wave:wave,
+                        t:colTime?parseTime(row[colTime]):0,
+                        route:colRoute?String(row[colRoute]||'').trim():'',
+                        loc:colLoc?String(row[colLoc]||'').trim():'',
+                        dsp:colDsp?cleanDSP(row[colDsp]):''
+                    };
+                    valid++;
+                });
+                if(valid>0)break;
+            }
+        }
+    }
+
+    return{data:result,validCount:valid,skippedCount:skipped,wavesFound};
+}
+
+// ===== HELPER: find header by partial match =====
+function findHeader(headers,searchTerms){
+    for(const h of headers){
+        const low=h.toLowerCase().replace(/[^a-z0-9]/g,'');
+        for(const term of searchTerms){
+            const tLow=term.toLowerCase().replace(/[^a-z0-9]/g,'');
+            if(low===tLow)return h;
+        }
+    }
+    for(const h of headers){
+        const low=h.toLowerCase().replace(/[^a-z0-9]/g,'');
+        for(const term of searchTerms){
+            const tLow=term.toLowerCase().replace(/[^a-z0-9]/g,'');
+            if(low.includes(tLow)||tLow.includes(low))return h;
+        }
+    }
+    return null;
+}
+
+// ===== HELPER: guess wave name from time =====
+function guessWave(t){
+    if(!t)return'Unknown';
+    const h=t*24;
+    if(h<9)return'SA Early';
+    if(h<10)return'Welle1';
+    if(h<10.7)return'Welle1';
+    if(h<11)return'Welle 2';
+    if(h<11.5)return'Welle3';
+    if(h<12)return'Welle4';
+    return'Welle '+(Math.floor(h-9));
+}
+
+// ===== SHOW PREVIEW =====
+function showPreview(result){
+    parsedExcelData=result.data;
+    document.getElementById('previewStats').innerHTML=
+        '<div class="pst"><div class="n" style="color:var(--green)">'+result.validCount+'</div><div class="l">Drivers</div></div>'+
+        '<div class="pst"><div class="n" style="color:var(--accent)">'+result.wavesFound.size+'</div><div class="l">Waves</div></div>'+
+        '<div class="pst"><div class="n" style="color:var(--red)">'+result.skippedCount+'</div><div class="l">Skipped</div></div>'+
+        '<div class="pst"><div class="n" style="color:var(--text3)">'+Object.keys(BADGE_MAP).length+'</div><div class="l">Current</div></div>';
+
+    const tbody=document.getElementById('previewBody');tbody.innerHTML='';
+    const entries=Object.entries(parsedExcelData);
+    const show=Math.min(entries.length,30);
+    for(let i=0;i<show;i++){
+        const[badge,d]=entries[i];
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td>'+(i+1)+'</td>'+
+            '<td><strong>'+badge+'</strong></td>'+
+            '<td style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis">'+(d.id||'--')+'</td>'+
+            '<td><span style="background:rgba(255,153,0,0.12);padding:2px 7px;border-radius:4px;font-weight:700;font-size:10px;color:var(--accent)">'+d.wave+'</span></td>'+
+            '<td>'+timeStr(d.t)+'</td>'+
+            '<td>'+(d.route||'--')+'</td>'+
+            '<td>'+(d.loc||'--')+'</td>'+
+            '<td>'+(d.dsp||'--')+'</td>';
+        tbody.appendChild(tr);
+    }
+    if(entries.length>30){
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td colspan="8" style="text-align:center;color:var(--text3);font-style:italic">… and '+(entries.length-30)+' more</td>';
+        tbody.appendChild(tr);
+    }
+    document.getElementById('previewSection').classList.add('show');
+    document.getElementById('applyBtn').disabled=false;
+}
+
+// ===== FILE HANDLING =====
+function handleDrop(e){const f=e.dataTransfer.files[0];if(f)processFile(f)}
+function handleFileSelect(e){const f=e.target.files[0];if(f)processFile(f)}
+
+function processFile(file){
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(!['xlsx','xls','csv'].includes(ext)){showToast('❌ Use .xlsx, .xls, or .csv','error');return}
+    document.getElementById('dropIcon').textContent='⏳';
+    document.getElementById('dropTitle').textContent=file.name;
+    document.getElementById('dropSub').textContent='Reading all sheets…';
+    document.getElementById('dropZone').classList.add('hf');
+
+    const reader=new FileReader();
+    reader.onload=function(e){
+        try{
+            const data=new Uint8Array(e.target.result);
+            const wb=XLSX.read(data,{type:'array',cellDates:true});
+
+            console.log('=== WORKBOOK LOADED ===');
+            console.log('Sheets:',wb.SheetNames);
+
+            const result=parseWorkbook(wb);
+
+            if(result.validCount>0){
+                document.getElementById('dropIcon').textContent='✅';
+                document.getElementById('dropSub').textContent=file.name+' — '+result.validCount+' drivers from '+wb.SheetNames.length+' sheets';
+
+                // Build info message
+                let info='<strong>✅ Successfully read '+result.validCount+' drivers in '+result.wavesFound.size+' waves</strong><br>';
+                info+='<small>Sheets processed: '+wb.SheetNames.join(', ')+'</small>';
+                if(result.skippedCount>0)info+='<br><small>Skipped '+result.skippedCount+' incomplete rows</small>';
+
+                // Check how many have routes
+                const withRoute=Object.values(result.data).filter(d=>d.route).length;
+                const withLoc=Object.values(result.data).filter(d=>d.loc).length;
+                const withDsp=Object.values(result.data).filter(d=>d.dsp).length;
+                info+='<br><small>Routes: '+withRoute+' · Locations: '+withLoc+' · DSP: '+withDsp+'</small>';
+
+                showSt(info,'ok');
+                showPreview(result);
+            } else {
+                document.getElementById('dropIcon').textContent='❌';
+                document.getElementById('dropSub').textContent='Could not read data';
+                showSt('❌ No valid data found.<br><small>Sheets: '+wb.SheetNames.join(', ')+'</small><br><small>Make sure file has "Wellen MO-SA" or "Input Form" sheet with badge numbers and wave names.</small>','err');
+            }
+        }catch(err){
+            console.error(err);
+            showToast('❌ Error: '+err.message,'error');
+            document.getElementById('dropIcon').textContent='❌';
+            document.getElementById('dropSub').textContent='Error reading file';
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ===== APPLY DATA =====
+function applyData() {
+    if (!parsedExcelData || Object.keys(parsedExcelData).length === 0) {
+        showToast('❌ No data!', 'error'); return;
+    }
+    BADGE_MAP = JSON.parse(JSON.stringify(parsedExcelData));
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+    localStorage.setItem('dnw1_data_date', today);
+
+    // Show uploading status
+    var btn = document.getElementById('applyBtn');
+    btn.textContent = '⏳ Uploading to cloud...';
+    btn.disabled = true;
+
+    // Save to cloud so ALL devices get it
+    saveToCloud(BADGE_MAP).then(function(ok) {
+        document.getElementById('dataBadge').textContent = '☁️ ' + today;
+        document.getElementById('dataBadge').className = 'dbadge on';
+        rebuildWaves(); updateStats(); renderWaveList(); closeUpload();
+        if (ok) {
+            showToast('☁️ ' + Object.keys(BADGE_MAP).length + ' drivers synced to ALL devices!', 'success');
+        } else {
+            showToast('⚠️ Saved locally. Cloud sync failed.', 'error');
+        }
+    });
+}
+
+// ===== RESET =====
+function clearSavedData() {
+    if (!confirm('Reset data for ALL devices?')) return;
+    localStorage.removeItem('dnw1_badge_data');
+    localStorage.removeItem('dnw1_data_date');
+    BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP));
+    // Clear cloud too
+    fetch(CLOUD_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({})
+    }).catch(function(){});
+    rebuildWaves(); updateStats(); renderWaveList();
+    document.getElementById('dataBadge').textContent = 'Default Data';
+    document.getElementById('dataBadge').className = 'dbadge';
+    closeUpload();
+    showToast('🔄 Reset for all devices', 'success');
+}
+// ===== TEMPLATE =====
+function downloadTemplate(){
+    const rows=[['badge','transporterId','wave','time','route','location','dsp']];
+    Object.entries(BADGE_MAP).forEach(([b,d])=>{rows.push([b,d.id||'',d.wave||'',d.t?timeStr(d.t):'',d.route||'',d.loc||'',d.dsp||''])});
+    const ws=XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols']=[{wch:12},{wch:22},{wch:12},{wch:8},{wch:12},{wch:14},{wch:8}];
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Data');
+    XLSX.writeFile(wb,'DNW1_Template_'+new Date().toISOString().split('T')[0]+'.xlsx');
+    showToast('📥 Template downloaded','success');
+}
+
+// ===== UPLOAD UI =====
+function openUpload(){document.getElementById('uploadPanel').classList.add('show');resetUploadUI()}
+function closeUpload(){document.getElementById('uploadPanel').classList.remove('show');setTimeout(()=>scanInput.focus(),200)}
+function resetUploadUI(){
+    document.getElementById('dropIcon').textContent='📁';
+    document.getElementById('dropTitle').textContent='Drop your file here or click to browse';
+    document.getElementById('dropSub').textContent='Supports .xlsx, .xls, .csv';
+    document.getElementById('dropZone').classList.remove('hf');
+    document.getElementById('previewSection').classList.remove('show');
+    document.getElementById('rdst').style.display='none';
+    document.getElementById('applyBtn').disabled=true;
+    document.getElementById('excelFile').value='';
+    parsedExcelData=null;
+}
+
+// ===== WAVES / STATS / CLOCK =====
+function rebuildWaves(){
+    const m={};Object.values(BADGE_MAP).forEach(d=>{if(d.wave&&!m[d.wave])m[d.wave]=d.t||0});
+    WAVES=Object.entries(m).map(([n,t])=>({name:n,t,display:timeStr(t)})).sort((a,b)=>a.t-b.t);
+}
+function waveCount(n){return Object.values(BADGE_MAP).filter(d=>d.wave===n).length}
+function curWave(){const now=nowDec();let c=null;for(let i=WAVES.length-1;i>=0;i--){if(now>=WAVES[i].t){c=WAVES[i];break}}return c}
+function updateClock(){document.getElementById('clock').textContent=nowStr()}
+setInterval(updateClock,1000);updateClock();
+function updateStats(){
+    document.getElementById('stTotal').textContent=Object.keys(BADGE_MAP).length;
+    document.getElementById('stScanned').textContent=scanCount;
+    document.getElementById('stWaves').textContent=WAVES.length;
+    const c=curWave();document.getElementById('stNext').textContent=c?c.name.replace('Welle','W'):'--';
+}
+setInterval(updateStats,30000);
+function renderWaveList(){
+    const list=document.getElementById('waveList');const c=curWave();list.innerHTML='';
+    if(WAVES.length===0){list.innerHTML='<div class="em">No waves</div>';return}
+    WAVES.forEach(w=>{
+        const cnt=waveCount(w.name);const isCur=c&&c.name===w.name;
+        const div=document.createElement('div');div.className='wr'+(isCur?' act':'');
+        div.innerHTML='<div style="display:flex;align-items:center"><span class="wn">'+w.name+'</span>'+(isCur?'<span class="wnow">NOW</span>':'')+'</div><span class="wt">'+w.display+'</span><span class="wc">'+cnt+'</span>';
+        div.onclick=()=>openWaveModal(w.name);list.appendChild(div);
+    });
+}
+setInterval(renderWaveList,60000);
+function openWaveModal(waveName){
+    const drivers=Object.entries(BADGE_MAP).filter(([b,d])=>d.wave===waveName);
+    document.getElementById('modalTitle').textContent=waveName+' — '+drivers.length+' Drivers';
+    const body=document.getElementById('modalBody');body.innerHTML='';
+    drivers.forEach(([badge,d],i)=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML='<td>'+(i+1)+'</td><td><strong>'+badge+'</strong></td><td style="font-size:10px">'+(d.id||'--')+'</td><td>'+(d.route||'--')+'</td><td>'+(d.loc||'--')+'</td><td>'+(d.dsp||'--')+'</td>';
+        body.appendChild(tr);
+    });
+    document.getElementById('overlay').classList.add('show');
+}
+
+// ===== SCANNER =====
+const scanInput=document.getElementById('scanInput');
+let scanTimeout=null;
+scanInput.addEventListener('input',function(){clearTimeout(scanTimeout);scanTimeout=setTimeout(()=>{const v=scanInput.value.trim();if(v.length>=3)processScan(v)},300)});
+scanInput.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){e.preventDefault();clearTimeout(scanTimeout);const v=scanInput.value.trim();if(v.length>=3)processScan(v)}
+    if(e.key==='Escape'){document.getElementById('result').className='res';scanInput.value=''}
+});
+function processScan(badgeStr){
+    const b1=badgeStr.trim(),b2=b1.replace(/^0+/,'')||b1,b3=b1.replace(/\.0$/,'');
+    const driver=BADGE_MAP[b1]||BADGE_MAP[b2]||BADGE_MAP[b3];
+    const badge=driver?(BADGE_MAP[b1]?b1:BADGE_MAP[b2]?b2:b3):b2;
+    const resEl=document.getElementById('result');const resTop=document.getElementById('resTop');
+    if(driver){
+        document.getElementById('resWave').textContent=driver.wave||'No Wave';
+        document.getElementById('resTime').textContent=timeStr(driver.t);
+        document.getElementById('resBadge').textContent=badge;
+        document.getElementById('resTrans').textContent=driver.id||'--';
+        document.getElementById('resRoute').textContent=driver.route||'--';
+        document.getElementById('resLoc').textContent=driver.loc||'--';
+        document.getElementById('resDSP').textContent=driver.dsp||'--';
+        document.getElementById('resStatus').textContent='Assigned ✓';
+        resTop.className='rh ok';addLog(badge,driver.wave,true);playSound('ok');
+    } else {
+        document.getElementById('resWave').textContent='NOT FOUND';
+        document.getElementById('resTime').textContent='⚠️';
+        document.getElementById('resBadge').textContent=badge;
+        document.getElementById('resTrans').textContent='--';
+        document.getElementById('resRoute').textContent='--';
+        document.getElementById('resLoc').textContent='--';
+        document.getElementById('resDSP').textContent='--';
+        document.getElementById('resStatus').textContent='Unknown Badge';
+        resTop.className='rh fail';addLog(badge,'NOT FOUND',false);playSound('no');
+    }
+    resEl.className='res show';scanCount++;updateStats();
+    setTimeout(()=>{scanInput.value='';scanInput.focus()},100);
+}
+
+// ===== SCAN LOG =====
+function addLog(badge,wave,found){scanLog.unshift({badge,wave,found,time:nowStr()});if(scanLog.length>50)scanLog.pop();renderLog()}
+function renderLog(){
+    const list=document.getElementById('logList');
+    if(scanLog.length===0){list.innerHTML='<div class="em">No scans yet</div>';return}
+    list.innerHTML='';scanLog.forEach(e=>{
+        const div=document.createElement('div');div.className='lr';
+        div.innerHTML='<span class="lb">'+e.badge+'</span><span class="lt '+(e.found?'ok':'no')+'">'+e.wave+'</span><span class="ltm">'+e.time+'</span>';
+        list.appendChild(div);
+    });
+}
+function clearLog(){scanLog=[];scanCount=0;updateStats();renderLog()}
+
+// ===== SOUND =====
+function playSound(type){
+    try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const osc=ctx.createOscillator();const gain=ctx.createGain();osc.connect(gain);gain.connect(ctx.destination);
+    if(type==='ok'){osc.frequency.value=880;gain.gain.value=0.1;osc.start();setTimeout(()=>osc.frequency.value=1100,100);setTimeout(()=>{osc.stop();ctx.close()},200)}
+    else{osc.frequency.value=300;gain.gain.value=0.15;osc.start();setTimeout(()=>osc.frequency.value=200,150);setTimeout(()=>{osc.stop();ctx.close()},400)}}catch(e){}
+}
+
+// ===== FOCUS =====
+document.addEventListener('click',function(){
+    if(!document.getElementById('overlay').classList.contains('show')&&
+       !document.getElementById('uploadPanel').classList.contains('show')&&
+       !document.getElementById('pwOverlay').classList.contains('show'))
+        setTimeout(()=>scanInput.focus(),100);
+});
+
+// ===== LOAD =====
+function loadData() {
+    // Apply theme
+    var theme = localStorage.getItem('dnw1_theme');
+    if (theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    // Load local data first (instant)
+    var saved = localStorage.getItem('dnw1_badge_data');
+    if (saved) {
+        try { BADGE_MAP = JSON.parse(saved); }
+        catch(e) { BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP)); }
+    } else {
+        BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP));
+    }
+    rebuildWaves(); updateStats(); renderWaveList();
+
+    // Then check cloud for newer data
+    document.getElementById('dataBadge').textContent = '⏳ Syncing...';
+
+    loadFromCloud().then(function(cloud) {
+        if (cloud && cloud.badges) {
+            var cloudCount = Object.keys(cloud.badges).length;
+            BADGE_MAP = JSON.parse(JSON.stringify(cloud.badges));
+            var today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+            localStorage.setItem('dnw1_data_date', today);
+            document.getElementById('dataBadge').textContent = '☁️ ' + (cloud.uploadedAt || today).substring(0, 10);
+            document.getElementById('dataBadge').className = 'dbadge on';
+            rebuildWaves(); updateStats(); renderWaveList();
+            console.log('☁️ Loaded ' + cloudCount + ' drivers from cloud');
+        } else {
+            var savedDate = localStorage.getItem('dnw1_data_date');
+            if (savedDate) {
+                document.getElementById('dataBadge').textContent = '📱 ' + savedDate;
+                document.getElementById('dataBadge').className = 'dbadge on';
+            } else {
+                document.getElementById('dataBadge').textContent = 'Default Data';
+                document.getElementById('dataBadge').className = 'dbadge';
+            }
+        }
+    });
+}
+loadData();scanInput.focus();
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('SW registered'))
+        .catch(err => console.log('SW failed', err));
+}
+</script>
+</body>
+</html>
