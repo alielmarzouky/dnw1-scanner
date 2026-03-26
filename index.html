@@ -1,0 +1,3752 @@
+
+<file name="index.html">
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+    <link rel="shortcut icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNW1 — Yard Marshall Scanner</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        
+        /* SETUP SCREEN */
+.setup-overlay{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0a1018,#131d27);z-index:9999;align-items:center;justify-content:center;flex-direction:column}
+.setup-overlay.show{display:flex}
+.setup-box{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:44px;width:480px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:setup-in .6s cubic-bezier(.16,1,.3,1)}
+@keyframes setup-in{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:none}}
+.setup-box h2{font-size:24px;font-weight:800;color:var(--text);margin-bottom:8px}
+.setup-box p{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.5}
+.setup-input-wrap{position:relative;margin-bottom:16px}
+.setup-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:20px}
+.setup-input{width:100%;padding:16px 20px 16px 48px;font-size:18px;font-weight:700;background:var(--bg2);color:var(--text);border:2px solid var(--border);border-radius:12px;outline:none;font-family:inherit;transition:.3s}
+.setup-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,153,0,0.1)}
+.setup-input::placeholder{font-weight:400;font-size:14px;color:var(--text3)}
+.setup-hint{font-size:11px;color:var(--text3);margin-bottom:24px;padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)}
+.setup-btn{width:100%;padding:16px;font-size:16px;font-weight:800;background:linear-gradient(135deg,var(--accent),#e68a00);color:#000;border:none;border-radius:12px;cursor:pointer;font-family:inherit;transition:.3s;letter-spacing:.5px}
+.setup-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,153,0,0.3)}
+.setup-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* USER BADGE IN HEADER */
+.user-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(168,85,247,0.15);color:#c084fc;cursor:pointer;border:1px solid rgba(168,85,247,0.2);transition:.2s;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.user-badge:hover{background:rgba(168,85,247,0.25);transform:translateY(-1px)}
+.user-badge .user-dot{width:7px;height:7px;border-radius:50%;background:#a855f7;flex-shrink:0;animation:pulse 2s infinite}
+
+/* DEVICE PANEL IN SIDEBAR */
+.device-list{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.device-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg2);border-radius:8px;font-size:11px}
+.device-row.me{border:1px solid rgba(168,85,247,0.3);background:rgba(168,85,247,0.06)}
+.device-name{font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+.device-status{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.device-status.online{background:var(--green);animation:pulse 2s infinite}
+.device-status.offline{background:var(--text3)}
+.device-scans{font-size:10px;color:var(--text2);font-weight:600}
+.device-time{font-size:9px;color:var(--text3)}
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        [data-theme="dark"]{
+            --bg:#0f1923;--bg2:#1a2634;--bg3:#243447;--card:#1e2d3d;--card2:#253849;
+            --accent:#ff9900;--accent2:#ffad33;--green:#00c48c;--green2:#00e6a0;
+            --red:#ff4757;--blue:#3b82f6;--purple:#a855f7;
+            --text:#e8edf2;--text2:#8b9bb4;--text3:#5a6f87;--border:rgba(255,255,255,0.06);
+            --header-bg:linear-gradient(135deg,#131d27,#1a2a3a);--input-bg:#151f2b;
+            --shadow:rgba(0,0,0,0.3);--hero-ok:linear-gradient(135deg,#00875a,#00c48c);
+            --hero-fail:linear-gradient(135deg,#c92a2a,#ff4757);
+        }
+        [data-theme="light"]{
+            --bg:#f0f2f5;--bg2:#ffffff;--bg3:#e8ecf0;--card:#ffffff;--card2:#f5f7fa;
+            --accent:#e8850c;--accent2:#ff9900;--green:#0d9f6e;--green2:#10b981;
+            --red:#dc2626;--blue:#2563eb;--purple:#7c3aed;
+            --text:#1a1a2e;--text2:#4a5568;--text3:#8896a6;--border:rgba(0,0,0,0.08);
+            --header-bg:linear-gradient(135deg,#232f3e,#37475a);--input-bg:#f8f9fb;
+            --shadow:rgba(0,0,0,0.08);--hero-ok:linear-gradient(135deg,#059669,#10b981);
+            --hero-fail:linear-gradient(135deg,#dc2626,#ef4444);
+        }
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+        
+/* HEADER — Professional Redesign */
+.header{background:var(--header-bg);padding:0 24px;height:58px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo-area{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--accent),#e68a00);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#000;box-shadow:0 3px 12px rgba(255,153,0,0.3)}
+.logo-text{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-sub{font-size:9px;color:rgba(255,255,255,0.4);font-weight:500;letter-spacing:1px;text-transform:uppercase}
+
+/* Header Right — 3 sections */
+.hr{display:flex;align-items:center;gap:0}
+
+/* Section 1: Action Buttons */
+.hr-actions{display:flex;align-items:center;gap:6px;padding-right:14px;border-right:1px solid rgba(255,255,255,0.08);margin-right:14px}
+.hbtn{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.1);padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:600;font-size:10px;transition:all .2s;display:flex;align-items:center;gap:4px;font-family:inherit;white-space:nowrap}
+.hbtn:hover{background:rgba(255,255,255,0.15);transform:translateY(-1px);color:#fff}
+.hbtn.pri{background:var(--accent);color:#000;border-color:var(--accent)}
+.hbtn.pri:hover{background:var(--accent2);box-shadow:0 4px 12px rgba(255,153,0,0.3)}
+.hbtn.sync-btn{position:relative}
+.hbtn.sync-btn.syncing{opacity:0.7;pointer-events:none}
+.hbtn.sync-btn .sync-spin{display:none;animation:spin 1s linear infinite}
+.hbtn.sync-btn.syncing .sync-spin{display:inline}
+.hbtn.sync-btn.syncing .sync-icon{display:none}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* Section 2: Status Indicators */
+.hr-status{display:flex;align-items:center;gap:8px;padding-right:14px;border-right:1px solid rgba(255,255,255,0.08);margin-right:14px}
+.status-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);transition:.2s;white-space:nowrap}
+.status-chip.cloud{color:var(--green)}
+.status-chip.cloud .chip-dot{background:var(--green)}
+.status-chip.devices{color:#c084fc;cursor:default}
+.status-chip.devices .chip-dot{background:#a855f7}
+.status-chip.weather-chip{gap:4px}
+.chip-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;animation:pulse 2s infinite}
+.chip-label{opacity:0.7;font-size:9px}
+
+/* Section 3: User + Controls */
+.hr-controls{display:flex;align-items:center;gap:8px}
+
+/* User Badge — Professional */
+.user-badge{display:flex;align-items:center;gap:7px;padding:5px 14px 5px 8px;border-radius:20px;font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(168,85,247,0.08));color:#c084fc;cursor:pointer;border:1px solid rgba(168,85,247,0.2);transition:all .25s;max-width:160px;height:32px}
+.user-badge:hover{background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(168,85,247,0.12));transform:translateY(-1px);box-shadow:0 4px 12px rgba(168,85,247,0.15)}
+.user-avatar{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0;text-transform:uppercase}
+.user-badge-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Compact icon buttons */
+.icon-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;padding:0;color:#fff}
+.icon-btn:hover{background:rgba(255,255,255,0.12);transform:translateY(-1px)}
+.icon-btn.voice-on{background:rgba(0,196,140,0.15);border-color:rgba(0,196,140,0.3)}
+.icon-btn.voice-on:hover{background:rgba(0,196,140,0.25)}
+
+/* Divider */
+.hr-divider{width:1px;height:24px;background:rgba(255,255,255,0.08);margin:0 4px}
+
+/* Clock — Compact */
+.clock{font-size:15px;font-weight:700;color:rgba(255,255,255,0.9);font-variant-numeric:tabular-nums;letter-spacing:.5px;min-width:62px;text-align:center}
+
+/* Online dot */
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* Data badge */
+.dbadge{font-size:9px;padding:3px 8px;border-radius:5px;font-weight:700;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);transition:all .3s;white-space:nowrap}
+.dbadge.on{background:rgba(0,196,140,0.15);color:var(--green)}
+.dbadge.syncing{background:rgba(255,153,0,0.15);color:var(--accent);animation:pulse 1s infinite}
+
+/* ====== OFFLINE QUEUE STYLES ====== */
+.offline-banner{display:none;position:fixed;top:58px;left:0;right:0;z-index:99;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;padding:10px 24px;font-size:13px;font-weight:700;text-align:center;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(220,38,38,0.4);animation:offline-slide .4s cubic-bezier(.16,1,.3,1)}
+.offline-banner.show{display:flex}
+@keyframes offline-slide{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.offline-banner .offline-icon{font-size:18px;animation:offline-pulse 1.5s infinite}
+@keyframes offline-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.1)}}
+.offline-banner .offline-text{flex:1}
+.offline-banner .offline-queue-count{background:rgba(255,255,255,0.2);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:800;backdrop-filter:blur(4px)}
+
+.queue-badge{display:none;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(255,153,0,0.15);color:var(--accent);white-space:nowrap;animation:queue-pulse 2s infinite;cursor:help}
+.queue-badge.show{display:flex}
+.queue-badge .queue-icon{font-size:12px}
+.queue-badge .queue-num{background:rgba(255,153,0,0.2);padding:1px 6px;border-radius:10px;font-size:9px;font-weight:800}
+@keyframes queue-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.queue-flush-toast{position:fixed;bottom:80px;right:28px;padding:12px 20px;border-radius:12px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-weight:700;font-size:12px;z-index:999;display:none;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,0.3)}
+.queue-flush-toast.show{display:flex;animation:ti .4s cubic-bezier(.16,1,.3,1)}
+
+/* Online status chip — enhanced */
+.status-chip.online-status.offline-mode{background:rgba(255,71,87,0.15);color:var(--red)}
+.status-chip.online-status.offline-mode .online-dot{background:var(--red);animation:none}
+.status-chip.online-status.has-queue{background:rgba(255,153,0,0.12);color:var(--accent)}
+.status-chip.online-status.has-queue .online-dot{background:var(--accent)}
+/* ====== END OFFLINE QUEUE STYLES ====== */
+
+/* Responsive Header */
+@media(max-width:1200px){
+    .hbtn span.btn-text{display:none}
+    .hbtn{padding:6px 8px}
+    .hr-actions{gap:4px;padding-right:10px;margin-right:10px}
+    .hr-status{gap:6px;padding-right:10px;margin-right:10px}
+    .chip-label{display:none}
+}
+@media(max-width:900px){
+    .header{padding:0 12px;height:52px}
+    .hr-status{display:none}
+    .user-badge-name{max-width:60px}
+    .clock{font-size:13px;min-width:54px}
+}
+
+        /* STATS */
+        .stats-bar{max-width:1500px;margin:0 auto;padding:18px 22px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+        .stc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px 18px;display:flex;align-items:center;gap:14px;transition:all .3s}
+        .stc:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}
+        .sti{width:46px;height:46px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+        .sti.o{background:rgba(255,153,0,0.1)}.sti.g{background:rgba(0,196,140,0.1)}.sti.b{background:rgba(59,130,246,0.1)}.sti.p{background:rgba(168,85,247,0.1)}
+        .stv{font-size:26px;font-weight:800;line-height:1;color:var(--text)}.stl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:3px}
+
+        /* COUNTDOWN */
+        .countdown-bar{max-width:1500px;margin:12px auto 0;padding:0 22px;display:none}
+        .countdown-bar.show{display:block}
+        .countdown-inner{background:linear-gradient(135deg,#1a2634,#243447);border:1px solid var(--border);border-radius:15px;padding:20px 28px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden}
+        .countdown-inner::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 50%,rgba(255,153,0,0.06),transparent 60%)}
+        .cd-wave{font-size:24px;font-weight:900;color:var(--accent);min-width:120px;position:relative;z-index:1}
+        .cd-label{font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;font-weight:700;position:relative;z-index:1}
+        .cd-time{font-size:42px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:2px;position:relative;z-index:1}
+        .cd-progress{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;position:relative;z-index:1}
+        .cd-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:3px;transition:width 1s linear}
+        .cd-drivers{font-size:12px;color:var(--text2);font-weight:600;min-width:120px;text-align:right;position:relative;z-index:1}
+        .cd-time.urgent{color:var(--red);animation:pulse 1s infinite}
+        .cd-dir{font-size:14px;font-weight:800;padding:4px 12px;border-radius:8px;position:relative;z-index:1}
+        .cd-dir.links{background:rgba(0,102,255,0.2);color:#60a5fa}
+        .cd-dir.rechts{background:rgba(255,153,0,0.2);color:#ffad33}
+
+        /* MAIN LAYOUT */
+        .main{max-width:1500px;margin:0 auto;padding:18px 22px;display:grid;grid-template-columns:1fr 360px;gap:18px}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:22px;transition:all .3s}
+        .card:hover{border-color:rgba(255,153,0,0.1)}
+        .ct{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:18px;display:flex;align-items:center;gap:9px}
+        .ct .i{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+        /* SCANNER */
+        .sa{position:relative;margin-bottom:18px}
+        .si{width:100%;padding:20px 22px 20px 52px;font-size:24px;font-weight:800;letter-spacing:3px;background:var(--input-bg);color:var(--text);border:2px solid var(--border);border-radius:13px;outline:none;transition:all .3s;font-family:'Inter',monospace}
+        .si::placeholder{font-size:13px;letter-spacing:0;font-weight:400;color:var(--text3)}
+        .si:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(255,153,0,0.08)}
+        .sic{position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:18px;opacity:.4}
+
+        /* SEARCH */
+        .search-input{width:100%;padding:14px 14px 14px 44px;font-size:14px;letter-spacing:0;font-weight:500;background:var(--input-bg);color:var(--text);border:2px solid var(--border);border-radius:13px;outline:none;transition:all .3s;font-family:'Inter',sans-serif}
+        .search-input::placeholder{color:var(--text3)}
+        .search-input:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(59,130,246,0.08)}
+        .sr-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg2);border-radius:8px;margin-bottom:4px;cursor:pointer;border:1px solid transparent;transition:.2s}
+        .sr-row:hover{border-color:var(--accent);transform:translateX(4px)}
+        .sr-badge{font-weight:800;font-size:13px;color:var(--accent);min-width:90px}
+        .sr-route{font-weight:700;font-size:12px;color:var(--text)}
+        .sr-wave{font-size:10px;padding:3px 8px;background:rgba(255,153,0,0.12);color:var(--accent);border-radius:4px;font-weight:700}
+        .sr-loc{font-size:11px;color:var(--text2)}
+        .sr-dsp{font-size:10px;color:var(--text3);font-weight:600}
+        .sr-count{font-size:11px;color:var(--text3);padding:8px 0}
+        .sr-dir{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:800}
+        .sr-dir.links{background:rgba(0,102,255,0.15);color:#60a5fa}
+        .sr-dir.rechts{background:rgba(255,153,0,0.15);color:#ffad33}
+
+        /* RESULT */
+        .res{display:none;margin-top:14px}.res.show{display:block;animation:ri .4s cubic-bezier(.16,1,.3,1)}
+        @keyframes ri{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}
+             .rh{padding:44px 48px;border-radius:18px 18px 0 0;display:flex;justify-content:space-between;align-items:center;position:relative;overflow:hidden;color:#fff}
+        .rh::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,0.1),transparent 60%)}
+        .rh.ok{background:var(--hero-ok)}.rh.fail{background:var(--hero-fail)}
+        .rhl,.rhr{position:relative;z-index:1}
+        .rhl-l{font-size:14px;text-transform:uppercase;letter-spacing:3px;opacity:.7;font-weight:600;margin-bottom:8px}
+        .rhl-w{font-size:96px;font-weight:900;letter-spacing:-2px;line-height:1}
+        .rhr{text-align:right}.rhr-t{font-size:56px;font-weight:900}
+        .rg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:0 0 0 0;overflow:hidden}
+        .rc{background:var(--bg2);padding:13px 16px}
+        .rc label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;display:block;margin-bottom:3px}
+        .rc .v{font-size:15px;font-weight:700;color:var(--text)}
+
+        /* DIRECTION RESULT */
+        .dir-result{display:none;padding:18px 24px;text-align:center;border-radius:0 0 15px 15px;animation:dir-flash .6s ease}
+        .dir-result.show{display:block}
+        .dir-result.links{background:linear-gradient(135deg,#0044cc,#3b82f6);color:#fff}
+        .dir-result.rechts{background:linear-gradient(135deg,#cc6600,#ff9900);color:#fff}
+        .dir-result-text{font-size:32px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
+        .dir-result-sub{font-size:13px;opacity:0.8;margin-top:4px;font-weight:600}
+        @keyframes dir-flash{0%{opacity:0;transform:scaleY(0)}100%{opacity:1;transform:scaleY(1)}}
+
+
+        /* TIPS */
+        .tips{margin-top:18px;background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:14px 18px;font-size:11px;color:var(--text3);display:flex;gap:10px;line-height:1.6}
+        .tips strong{color:var(--accent)}
+
+        /* SIDEBAR */
+        .sidebar{display:flex;flex-direction:column;gap:14px}
+        .wl{display:flex;flex-direction:column;gap:5px;max-height:280px;overflow-y:auto}
+        .wl::-webkit-scrollbar{width:3px}.wl::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+        .wr{display:flex;justify-content:space-between;align-items:center;padding:11px 13px;background:var(--bg2);border-radius:9px;border:1px solid transparent;cursor:pointer;transition:all .2s}
+        .wr:hover{border-color:var(--accent);transform:translateX(3px)}
+        .wr.act{border-color:var(--green);background:rgba(0,196,140,0.06)}
+        .wn{font-weight:700;font-size:12px;color:var(--text)}.wt{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums}
+        .wc{background:var(--bg3);color:var(--accent);padding:2px 9px;border-radius:16px;font-size:10px;font-weight:800}
+        .wnow{font-size:8px;background:var(--green);color:#000;padding:2px 5px;border-radius:3px;font-weight:800;text-transform:uppercase;margin-left:5px}
+        .wdir{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:800;margin-left:5px}
+        .wdir.links{background:rgba(0,102,255,0.15);color:#60a5fa}
+        .wdir.rechts{background:rgba(255,153,0,0.15);color:#ffad33}
+        
+
+        /* WAVE PROGRESS */
+        .wpb{margin-bottom:14px}
+        .wpb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+        .wpb-name{font-weight:700;font-size:13px;color:var(--text)}
+        .wpb-count{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums}
+        .wpb-count strong{color:var(--green)}
+        .wpb-time{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums}
+        .wpb-dir{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:800;margin-left:6px}
+        .wpb-dir.links{background:rgba(0,102,255,0.15);color:#60a5fa}
+        .wpb-dir.rechts{background:rgba(255,153,0,0.15);color:#ffad33}
+        .wpb-track{height:28px;background:var(--bg3);border-radius:8px;overflow:hidden;position:relative}
+        .wpb-fill{height:100%;border-radius:8px;transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;font-size:11px;font-weight:800;color:#000;min-width:40px}
+        .wpb-fill.low{background:linear-gradient(90deg,#ff4757,#ff6b7a)}
+        .wpb-fill.mid{background:linear-gradient(90deg,#ff9900,#ffad33)}
+        .wpb-fill.high{background:linear-gradient(90deg,#00c48c,#00e6a0)}
+        .wpb-fill.full{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+        
+
+        /* LOG */
+        .ll{display:flex;flex-direction:column;gap:3px;max-height:320px;overflow-y:auto}
+        .ll::-webkit-scrollbar{width:3px}.ll::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+        .lr{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:var(--bg2);border-radius:7px;font-size:11px;animation:li .3s ease}
+        @keyframes li{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+        .lb{font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+        .lt{padding:2px 8px;border-radius:5px;font-weight:700;font-size:9px;text-transform:uppercase;letter-spacing:.5px}
+        .lt.ok{background:rgba(0,196,140,0.12);color:var(--green)}.lt.no{background:rgba(255,71,87,0.12);color:var(--red)}
+        .ltm{color:var(--text3);font-size:10px;font-variant-numeric:tabular-nums}
+        .log-dir{font-size:9px;padding:1px 5px;border-radius:3px;font-weight:800}
+        .log-dir.links{background:rgba(0,102,255,0.12);color:#60a5fa}
+        .log-dir.rechts{background:rgba(255,153,0,0.12);color:#ffad33}
+        .cbtn{background:none;border:1px solid var(--border);padding:3px 10px;border-radius:5px;cursor:pointer;font-size:10px;color:var(--text3);font-family:inherit;transition:.2s}
+        .cbtn:hover{border-color:var(--red);color:var(--red)}
+        .em{text-align:center;padding:28px;color:var(--text3);font-size:12px}
+
+        /* MODALS */
+        .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}.ov.show{display:flex}
+        .mod{background:var(--card);border:1px solid var(--border);border-radius:16px;width:760px;max-height:80vh;overflow-y:auto;padding:26px}
+        .mod h3{margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;font-size:17px}
+        .mc{background:var(--bg3);border:none;font-size:16px;cursor:pointer;color:var(--text3);width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:.2s}
+        .mc:hover{background:var(--red);color:#fff}
+        table{width:100%;border-collapse:collapse}
+        th{background:var(--bg3);color:var(--accent);padding:9px 12px;font-size:9px;text-align:left;text-transform:uppercase;letter-spacing:1.5px;font-weight:700}
+        td{padding:9px 12px;border-bottom:1px solid var(--border);font-size:11px}
+        tr:hover td{background:var(--bg2)}
+        .pw-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:400;align-items:center;justify-content:center}
+        .pw-overlay.show{display:flex}
+        .pw-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:36px;width:400px;text-align:center}
+        .pw-box h2{font-size:20px;margin-bottom:6px;color:var(--text)}
+        .pw-box p{font-size:12px;color:var(--text3);margin-bottom:22px}
+        .pw-input{width:100%;padding:14px 18px;font-size:18px;font-weight:700;letter-spacing:4px;text-align:center;background:var(--bg2);color:var(--text);border:2px solid var(--border);border-radius:10px;outline:none;font-family:inherit;transition:.3s}
+        .pw-input:focus{border-color:var(--accent)}
+        .pw-input.err{border-color:var(--red);animation:shake .4s ease}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+        .pw-btns{display:flex;gap:10px;margin-top:18px}
+        .pw-btns button{flex:1;padding:12px;border:none;border-radius:10px;cursor:pointer;font-weight:700;font-size:14px;font-family:inherit;transition:.2s}
+        .pw-ok{background:var(--accent);color:#000}.pw-ok:hover{background:var(--accent2)}
+        .pw-cancel{background:var(--bg3);color:var(--text2)}.pw-cancel:hover{background:var(--card2)}
+        .pw-err{color:var(--red);font-size:12px;font-weight:600;margin-top:10px;min-height:18px}
+
+        /* UPLOAD */
+        .up{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:300;align-items:center;justify-content:center}.up.show{display:flex}
+        .uc{background:var(--card);border:1px solid var(--border);border-radius:18px;width:820px;max-height:88vh;overflow-y:auto;padding:30px}
+        .uc::-webkit-scrollbar{width:5px}.uc::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
+        .uh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+        .uh h2{font-size:20px;font-weight:800;color:var(--text)}.uh p{font-size:12px;color:var(--text3);margin-top:5px}
+        .dz{border:2px dashed var(--text3);border-radius:14px;padding:44px 28px;text-align:center;cursor:pointer;transition:all .3s;margin-bottom:18px;background:var(--bg2)}
+        .dz:hover{border-color:var(--accent)}.dz.dg{border-color:var(--green);background:rgba(0,196,140,0.04)}
+        .dz.hf{border-color:var(--green);border-style:solid;background:rgba(0,196,140,0.04)}
+        .dzi{font-size:48px;margin-bottom:10px}.dzt{font-size:16px;font-weight:700;color:var(--text);margin-bottom:5px}.dzs{font-size:11px;color:var(--text3)}
+        #rdst{display:none;padding:14px 18px;border-radius:11px;margin-bottom:16px;font-size:12px;line-height:1.7}
+        .ps{display:none;margin-bottom:18px}.ps.show{display:block}
+        .ps h3{margin-bottom:10px;font-size:14px;color:var(--text)}
+        .pss{display:flex;gap:10px;margin-bottom:14px}
+        .pst{background:var(--bg2);padding:12px 20px;border-radius:11px;border:1px solid var(--border);text-align:center;flex:1}
+        .pst .n{font-size:28px;font-weight:900;line-height:1}.pst .l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-top:3px}
+        .ptw{max-height:260px;overflow-y:auto;border-radius:9px;border:1px solid var(--border)}
+        .ab{display:flex;justify-content:space-between;align-items:center;padding-top:18px;border-top:1px solid var(--border)}
+        .btn{padding:10px 22px;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;font-family:inherit}
+        .ba{background:var(--green);color:#000;font-size:14px;padding:12px 28px}.ba:hover{background:var(--green2);transform:translateY(-1px)}
+        .ba:disabled{background:var(--bg3);color:var(--text3);cursor:not-allowed;transform:none}
+        .bc{background:var(--bg3);color:var(--text2)}.bc:hover{color:var(--accent)}
+        .bd{background:transparent;color:var(--red);border:1px solid rgba(255,71,87,0.3)}.bd:hover{background:rgba(255,71,87,0.08)}
+
+        /* TOAST */
+        .toast{position:fixed;bottom:28px;right:28px;padding:14px 24px;border-radius:12px;color:#fff;font-weight:700;font-size:13px;z-index:999;display:none;align-items:center;gap:8px;box-shadow:0 6px 24px rgba(0,0,0,0.4)}
+        .toast.show{display:flex;animation:ti .4s cubic-bezier(.16,1,.3,1)}
+        .toast.success{background:linear-gradient(135deg,#00875a,#00c48c)}.toast.error{background:linear-gradient(135deg,#c92a2a,#ff4757)}
+        @keyframes ti{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+    
+        /* SYNC BANNER */
+        .sync-banner{display:none;background:linear-gradient(135deg,rgba(255,153,0,0.15),rgba(255,153,0,0.05));border:1px solid rgba(255,153,0,0.3);border-radius:10px;padding:10px 18px;margin:12px 22px 0;max-width:1500px;margin-left:auto;margin-right:auto;font-size:12px;color:var(--accent);align-items:center;gap:8px;animation:ri .4s ease}
+        .sync-banner.show{display:flex}
+
+        /* RESPONSIVE */
+        @media(max-width:1100px){.main{grid-template-columns:1fr}.stats-bar{grid-template-columns:1fr 1fr}.uc{width:95%;padding:20px}}
+             @media(max-width:640px){.stats-bar{grid-template-columns:1fr}.header{padding:0 14px}.hr{gap:5px;flex-wrap:wrap}.dir-text{font-size:24px}.dir-arrow{font-size:40px}.dir-result-text{font-size:22px}.cd-time{font-size:28px}}
+
+        /* LAST UPLOAD TIME CHIP */
+        .upload-time-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:600;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.6);white-space:nowrap;cursor:help;transition:.2s}
+        .upload-time-chip:hover{background:rgba(255,255,255,0.1)}
+        .upload-time-chip.recent{color:var(--green)}
+        .upload-time-chip.today{color:var(--green2)}
+        .upload-time-chip.old{color:var(--accent)}
+        .upload-time-chip.stale{color:var(--red)}
+        .upload-time-chip .ut-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+        .upload-time-chip.recent .ut-dot{background:var(--green)}
+        .upload-time-chip.today .ut-dot{background:var(--green2)}
+        .upload-time-chip.old .ut-dot{background:var(--accent)}
+        .upload-time-chip.stale .ut-dot{background:var(--red)}
+        .upload-time-chip.none .ut-dot{background:var(--text3)}
+        .upload-time-chip.none{color:var(--text3)}
+        .upload-info-bar{max-width:1500px;margin:8px auto 0;padding:0 22px}
+        .upload-info-inner{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2);gap:12px}
+        .upload-info-inner .ui-label{font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;font-size:9px}
+        .upload-info-inner .ui-value{font-weight:700;color:var(--text);font-size:13px}
+        .upload-info-inner .ui-relative{color:var(--accent);font-weight:600;font-size:11px}
+        .upload-info-inner .ui-section{display:flex;align-items:center;gap:8px}
+        .upload-info-inner .ui-divider{width:1px;height:24px;background:var(--border)}
+
+        /* ====== FULLSCREEN SCAN MODE ====== */
+.fs-overlay{display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0a1018,#0f1923);z-index:10000;flex-direction:column;align-items:center;overflow-y:auto}
+.fs-overlay.show{display:flex}
+
+.fs-header{width:100%;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
+.fs-wave-info{display:flex;align-items:center;gap:16px}
+.fs-wave-name{font-size:24px;font-weight:900;color:var(--accent)}
+.fs-wave-time{font-size:18px;font-weight:700;color:var(--text2)}
+.fs-wave-dir{font-size:16px;font-weight:800;padding:6px 16px;border-radius:8px}
+.fs-wave-dir.links{background:rgba(0,102,255,0.2);color:#60a5fa}
+.fs-wave-dir.rechts{background:rgba(255,153,0,0.2);color:#ffad33}
+.fs-progress-text{font-size:16px;font-weight:700;color:var(--text)}
+.fs-progress-text strong{color:var(--green);font-size:20px}
+.fs-exit{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;transition:.2s;display:flex;align-items:center;gap:6px}
+.fs-exit:hover{background:rgba(255,71,87,0.2);border-color:rgba(255,71,87,0.4);color:var(--red)}
+.fs-clock{font-size:28px;font-weight:800;color:rgba(255,255,255,0.8);font-variant-numeric:tabular-nums}
+
+.fs-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;max-width:900px;padding:20px 24px;gap:20px}
+
+/* Scanner */
+.fs-scanner{width:100%;position:relative}
+.fs-scanner-input{width:100%;padding:28px 28px 28px 64px;font-size:36px;font-weight:900;letter-spacing:4px;background:rgba(255,255,255,0.04);color:var(--text);border:3px solid rgba(255,255,255,0.1);border-radius:18px;outline:none;transition:.3s;font-family:'Inter',monospace;text-align:center}
+.fs-scanner-input::placeholder{font-size:16px;letter-spacing:0;font-weight:400;color:var(--text3)}
+.fs-scanner-input:focus{border-color:var(--accent);box-shadow:0 0 0 6px rgba(255,153,0,0.12);background:rgba(255,153,0,0.03)}
+.fs-scanner-icon{position:absolute;left:24px;top:50%;transform:translateY(-50%);font-size:24px;opacity:.4}
+
+/* Result */
+.fs-result{width:100%;display:none;animation:fs-result-in .5s cubic-bezier(.16,1,.3,1)}
+.fs-result.show{display:block}
+@keyframes fs-result-in{from{opacity:0;transform:translateY(30px) scale(.95)}to{opacity:1;transform:none}}
+
+.fs-result-hero{padding:40px;border-radius:24px;text-align:center;position:relative;overflow:hidden}
+.fs-result-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(255,255,255,0.12),transparent 70%)}
+.fs-result-hero.ok{background:linear-gradient(135deg,#00875a,#00c48c)}
+.fs-result-hero.fail{background:linear-gradient(135deg,#c92a2a,#ff4757)}
+
+.fs-result-wave{font-size:120px;font-weight:900;color:#fff;position:relative;z-index:1;text-shadow:0 6px 30px rgba(0,0,0,0.4);letter-spacing:4px}
+.fs-result-time{font-size:28px;font-weight:700;color:rgba(255,255,255,0.8);position:relative;z-index:1;margin-top:4px}
+
+/* Direction — GIANT */
+.fs-direction{width:100%;padding:32px;border-radius:20px;text-align:center;display:none;animation:fs-dir-flash .5s cubic-bezier(.16,1,.3,1)}
+.fs-direction.show{display:block}
+.fs-direction.links{background:linear-gradient(135deg,#0044cc,#3b82f6)}
+.fs-direction.rechts{background:linear-gradient(135deg,#cc6600,#ff9900)}
+.fs-direction-text{font-size:72px;font-weight:900;color:#fff;letter-spacing:4px;text-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.fs-direction-sub{font-size:20px;color:rgba(255,255,255,0.8);margin-top:8px;font-weight:700}
+@keyframes fs-dir-flash{from{opacity:0;transform:scaleY(0)}to{opacity:1;transform:scaleY(1)}}
+
+/* Info grid */
+.fs-info{width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(255,255,255,0.06);border-radius:16px;overflow:hidden}
+.fs-info-cell{background:var(--bg2);padding:16px 20px;text-align:center}
+.fs-info-cell label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:700;display:block;margin-bottom:4px}
+.fs-info-cell .val{font-size:20px;font-weight:800;color:var(--text)}
+
+/* Recent scans */
+.fs-recent{width:100%;max-width:700px}
+.fs-recent-title{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px;text-align:center}
+.fs-recent-list{display:flex;flex-direction:column;gap:4px}
+.fs-recent-item{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
+.fs-recent-badge{font-weight:800;font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.fs-recent-wave{font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;background:rgba(255,153,0,0.12);color:var(--accent)}
+.fs-recent-dir{font-size:14px}
+.fs-recent-time{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums}
+.fs-recent-route{font-size:11px;color:var(--text2);font-weight:600}
+
+/* Missing drivers count */
+.fs-missing{width:100%;text-align:center;padding:12px;border-radius:12px;background:rgba(255,71,87,0.08);border:1px solid rgba(255,71,87,0.15);display:none}
+.fs-missing.show{display:block}
+.fs-missing-text{font-size:16px;font-weight:800;color:var(--red)}
+.fs-missing-sub{font-size:12px;color:var(--text3);margin-top:4px}
+
+/* Fullscreen button in header */
+.fs-btn{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(168,85,247,0.1));color:#c084fc;border:1px solid rgba(168,85,247,0.3);padding:6px 12px;border-radius:7px;cursor:pointer;font-weight:700;font-size:10px;transition:all .2s;display:flex;align-items:center;gap:5px;font-family:inherit;white-space:nowrap}
+.fs-btn:hover{background:linear-gradient(135deg,rgba(168,85,247,0.3),rgba(168,85,247,0.15));transform:translateY(-1px);box-shadow:0 4px 12px rgba(168,85,247,0.2)}
+
+/* Progress bar in fullscreen */
+.fs-progress-bar{width:100%;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-top:8px}
+.fs-progress-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.fs-progress-fill.low{background:linear-gradient(90deg,#ff4757,#ff6b7a)}
+.fs-progress-fill.mid{background:linear-gradient(90deg,#ff9900,#ffad33)}
+.fs-progress-fill.high{background:linear-gradient(90deg,#00c48c,#00e6a0)}
+.fs-progress-fill.full{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
+
+@media(max-width:768px){
+    .fs-result-wave{font-size:72px}
+    .fs-direction-text{font-size:42px}
+    .fs-scanner-input{font-size:24px;padding:20px 20px 20px 52px}
+    .fs-info{grid-template-columns:repeat(2,1fr)}
+    .fs-clock{font-size:20px}
+}/* ====== DUPLICATE SCAN WARNING ====== */
+.dup-warning{display:none;margin-top:12px;padding:18px 24px;border-radius:14px;background:linear-gradient(135deg,rgba(255,153,0,0.1),rgba(255,153,0,0.04));border:2px solid rgba(255,153,0,0.3);animation:dup-shake .5s cubic-bezier(.16,1,.3,1)}
+.dup-warning.show{display:block}
+@keyframes dup-shake{0%{transform:translateX(0)}15%{transform:translateX(-8px)}30%{transform:translateX(8px)}45%{transform:translateX(-5px)}60%{transform:translateX(5px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)}}
+.dup-warning-title{font-size:18px;font-weight:900;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.dup-warning-info{font-size:13px;color:var(--text2);line-height:1.8}
+.dup-warning-info strong{color:var(--text)}
+.dup-warning-count{display:inline-block;background:rgba(255,153,0,0.2);color:var(--accent);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:800;margin-left:8px}
+.dup-warning-device{font-size:11px;color:var(--text3);margin-top:4px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px}
+
+/* Fullscreen duplicate warning */
+.fs-dup-warning{display:none;width:100%;padding:20px 28px;border-radius:16px;background:linear-gradient(135deg,rgba(255,153,0,0.12),rgba(255,153,0,0.04));border:2px solid rgba(255,153,0,0.3);text-align:center;animation:dup-shake .5s cubic-bezier(.16,1,.3,1)}
+.fs-dup-warning.show{display:block}
+.fs-dup-warning-title{font-size:28px;font-weight:900;color:var(--accent)}
+.fs-dup-warning-info{font-size:16px;color:var(--text2);margin-top:6px}
+.fs-dup-warning-info strong{color:var(--text)}
+
+/* ====== WAVE ALARM ====== */
+.wave-alarm{display:none;position:fixed;top:0;left:0;right:0;z-index:9998;padding:0;animation:wave-alarm-in .5s cubic-bezier(.16,1,.3,1)}
+.wave-alarm.show{display:block}
+@keyframes wave-alarm-in{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.wave-alarm-inner{padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.wave-alarm-inner.soon{background:linear-gradient(135deg,#ff9900,#e68a00);color:#000}
+.wave-alarm-inner.now{background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;animation:wave-alarm-pulse 1s infinite}
+@keyframes wave-alarm-pulse{0%,100%{opacity:1}50%{opacity:.85}}
+
+.wave-alarm-left{display:flex;align-items:center;gap:14px}
+.wave-alarm-icon{font-size:32px;animation:wave-alarm-ring 1s ease infinite}
+@keyframes wave-alarm-ring{0%,100%{transform:rotate(0)}25%{transform:rotate(15deg)}75%{transform:rotate(-15deg)}}
+.wave-alarm-text{font-size:18px;font-weight:900}
+.wave-alarm-sub{font-size:13px;font-weight:600;opacity:.8}
+.wave-alarm-right{display:flex;align-items:center;gap:12px}
+.wave-alarm-countdown{font-size:36px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:2px}
+.wave-alarm-dir{font-size:14px;font-weight:800;padding:6px 14px;border-radius:8px}
+.wave-alarm-dir.links{background:rgba(0,0,0,0.2);color:#fff}
+.wave-alarm-dir.rechts{background:rgba(0,0,0,0.2);color:#fff}
+.wave-alarm-close{background:rgba(0,0,0,0.2);border:none;color:inherit;width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:900;display:flex;align-items:center;justify-content:center;transition:.2s;font-family:inherit}
+.wave-alarm-close:hover{background:rgba(0,0,0,0.4)}
+
+/* Fullscreen wave alarm */
+.fs-wave-alarm{display:none;width:100%;padding:24px;border-radius:16px;text-align:center;animation:wave-alarm-pulse 1s infinite}
+.fs-wave-alarm.show{display:block}
+.fs-wave-alarm.soon{background:linear-gradient(135deg,rgba(255,153,0,0.2),rgba(255,153,0,0.08));border:2px solid rgba(255,153,0,0.4)}
+.fs-wave-alarm.now{background:linear-gradient(135deg,rgba(220,38,38,0.2),rgba(220,38,38,0.08));border:2px solid rgba(220,38,38,0.4)}
+.fs-wave-alarm-text{font-size:24px;font-weight:900;color:var(--accent)}
+.fs-wave-alarm.now .fs-wave-alarm-text{color:var(--red)}
+.fs-wave-alarm-countdown{font-size:48px;font-weight:900;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:3px}
+    </style>
+</head>
+<body>
+
+<!-- ====== OFFLINE BANNER (NEW) ====== -->
+<div class="offline-banner" id="offlineBanner">
+    <span class="offline-icon">📡</span>
+    <span class="offline-text">You're offline — scans are queued and will sync automatically when reconnected</span>
+    <span class="offline-queue-count" id="offlineQueueCount">0 queued</span>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="logo-area">
+        <div class="logo-icon" style="font-size:0;line-height:0">
+            <svg viewBox="0 0 36 36" width="24" height="24">
+                <text x="2" y="15" font-family="Arial" font-size="12" font-weight="900" fill="#000">a</text>
+                <text x="19" y="15" font-family="Arial" font-size="12" font-weight="900" fill="#000">z</text>
+                <path d="M6 22Q18 28 30 20" stroke="#000" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+                <path d="M27 17L30 20L27 22.5" stroke="#000" stroke-width="2.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div><div class="logo-text">DNW1</div><div class="logo-sub">Yard Marshall Dispatch</div></div>
+    </div>
+
+    <div class="hr">
+        <!-- Section 1: Actions -->
+        <div class="hr-actions">
+            <button class="hbtn pri" onclick="promptPasswordFor('upload')">📤 <span class="btn-text">Upload</span></button>
+            <button class="hbtn sync-btn" id="syncBtn" onclick="manualSync()">
+                <span class="sync-icon">🔄</span>
+                <span class="sync-spin">⏳</span>
+                <span class="btn-text">Sync</span>
+            </button>
+            <button class="hbtn" onclick="promptPasswordFor('template')">📥 <span class="btn-text">Template</span></button>
+            <button class="hbtn" onclick="promptPasswordFor('report')">📋 <span class="btn-text">Report</span></button>
+            <button class="fs-btn" onclick="enterFullscreen()">🖥️ <span class="btn-text">Fullscreen</span></button>
+        </div>
+
+        <!-- Section 2: Status -->
+        <div class="hr-status">
+            <div class="status-chip cloud">
+                <span class="chip-dot"></span>
+                <span class="dbadge" id="dataBadge" style="background:none;padding:0;font-size:10px;color:inherit">Default</span>
+            </div>
+            <!-- OFFLINE QUEUE BADGE (NEW) -->
+            <div class="queue-badge" id="queueBadge" title="Offline scans waiting to sync">
+                <span class="queue-icon">📦</span>
+                <span>Queue</span>
+                <span class="queue-num" id="queueBadgeNum">0</span>
+            </div>
+            <div class="status-chip devices" id="deviceChip" title="Connected devices">
+                <span class="chip-dot" style="background:#a855f7"></span>
+                <span id="deviceIndicator">1 Gerät</span>
+            </div>
+            <div class="status-chip weather-chip" id="weather">
+                <span id="weatherIcon">⏳</span>
+                <span id="weatherTemp">--°</span>
+            </div>
+                        <div class="upload-time-chip none" id="uploadTimeChip" title="Last Excel data upload">
+                <span class="ut-dot"></span>
+                <span>📤</span>
+                <span id="uploadTimeText">No upload</span>
+            </div>
+            <div class="status-chip online-status" id="onlineChip">
+                <span class="online-dot" id="onlineDot"></span>
+                <span id="onlineStatus">Online</span>
+            </div>
+        </div>
+
+        <!-- Section 3: User + Controls -->
+        <div class="hr-controls">
+            <div class="user-badge" id="userBadge" onclick="openNameEdit()" title="Click to change name">
+                <div class="user-avatar" id="userAvatar">?</div>
+                <span class="user-badge-name" id="userBadgeName">--</span>
+            </div>
+            <div class="hr-divider"></div>
+            <button class="icon-btn voice-on" id="voiceBtn" onclick="toggleVoice()" title="Voice on/off">🔊</button>
+            <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Theme">🌙</button>
+            <div class="hr-divider"></div>
+            <div class="clock" id="clock">--:--</div>
+        </div>
+    </div>
+</div>
+
+<div class="sync-banner" id="syncBanner">
+    <span>🔄</span>
+    <span id="syncBannerText">New data available!</span>
+</div>
+<!-- UPLOAD INFO BAR -->
+<div class="upload-info-bar" id="uploadInfoBar" style="display:none">
+    <div class="upload-info-inner">
+        <div class="ui-section">
+            <span style="font-size:16px">📤</span>
+            <div>
+                <div class="ui-label">Last Excel Upload</div>
+                <div class="ui-value" id="uploadInfoTime">--</div>
+            </div>
+        </div>
+        <div class="ui-divider"></div>
+        <div class="ui-section">
+            <div>
+                <div class="ui-label">Uploaded By</div>
+                <div class="ui-value" id="uploadInfoDevice">--</div>
+            </div>
+        </div>
+        <div class="ui-divider"></div>
+        <div class="ui-section">
+            <div>
+                <div class="ui-label">Data Age</div>
+                <div class="ui-relative" id="uploadInfoRelative">--</div>
+            </div>
+        </div>
+        <div class="ui-divider"></div>
+        <div class="ui-section">
+            <div>
+                <div class="ui-label">Drivers</div>
+                <div class="ui-value" id="uploadInfoCount">0</div>
+            </div>
+        </div>
+        <div class="ui-divider"></div>
+        <div class="ui-section">
+            <div>
+                <div class="ui-label">Waves</div>
+                <div class="ui-value" id="uploadInfoWaves">0</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- STATS -->
+<div class="stats-bar">
+    <div class="stc"><div class="sti o">📦</div><div><div class="stv" id="stTotal">0</div><div class="stl">Total Routes</div></div></div>
+    <div class="stc"><div class="sti g">✅</div><div><div class="stv" id="stScanned">0</div><div class="stl">Scanned</div></div></div>
+    <div class="stc"><div class="sti b">🌊</div><div><div class="stv" id="stWaves">0</div><div class="stl">Waves</div></div></div>
+    <div class="stc"><div class="sti p">🕐</div><div><div class="stv" id="stNext">--</div><div class="stl">Current Wave</div></div></div>
+</div>
+
+
+<!-- MAIN -->
+<div class="main">
+    <div style="display:flex;flex-direction:column;gap:18px">
+        <!-- SCANNER CARD -->
+        <div class="card">
+            <div class="ct"><div class="i" style="background:rgba(255,153,0,0.1)">📷</div>Badge Scanner</div>
+            <div class="sa"><span class="sic">🔍</span><input class="si" id="scanInput" placeholder="Scan badge barcode here…" autofocus autocomplete="off"></div>
+            
+            <!-- SEARCH -->
+            <div class="sa" style="margin-top:0">
+                <span class="sic">🔎</span>
+                <input class="search-input" id="searchInput" style="padding-left:44px" placeholder="Search badge, route, DSP, location..." oninput="searchDrivers(this.value)">
+            </div>
+            <div id="searchResults" style="display:none;max-height:250px;overflow-y:auto;margin-top:8px"></div>
+
+            <!-- RESULT -->
+            <div class="res" id="result">
+                <div class="rh" id="resTop">
+                    <div class="rhl"><div class="rhl-l">Assigned Wave</div><div class="rhl-w" id="resWave">--</div></div>
+                    <div class="rhr"><div class="rhl-l">Dispatch Time</div><div class="rhr-t" id="resTime">--:--</div></div>
+                </div>
+                <div class="rg">
+                    <div class="rc"><label>Badge ID</label><div class="v" id="resBadge">--</div></div>
+                    <div class="rc"><label>Transporter</label><div class="v" id="resTrans">--</div></div>
+                    <div class="rc"><label>Route</label><div class="v" id="resRoute">--</div></div>
+                    <div class="rc"><label>Location</label><div class="v" id="resLoc">--</div></div>
+                    <div class="rc"><label>DSP</label><div class="v" id="resDSP">--</div></div>
+                    <div class="rc"><label>Richtung</label><div class="v" id="resStatus">--</div></div>
+                </div>
+                <!-- DIRECTION RESULT -->
+                <div class="dir-result" id="dirResult">
+                    <div class="dir-result-text" id="dirResultText">⬅️ GEH NACH LINKS ⬅️</div>
+                    <div class="dir-result-sub" id="dirResultSub">Welle 1 • STG-C.12</div>
+                </div>
+            </div>
+            <!-- DUPLICATE SCAN WARNING -->
+            <div class="dup-warning" id="dupWarning">
+                <div class="dup-warning-title">⚠️ BEREITS GESCANNT! <span class="dup-warning-count" id="dupCount">2x</span></div>
+                <div class="dup-warning-info" id="dupInfo"></div>
+                <div class="dup-warning-device" id="dupDevice"></div>
+            </div>
+            <div class="tips"><span style="font-size:18px;flex-shrink:0">💡</span><div><strong>🔊 Voice ON:</strong> Announces wave + direction. <strong>⬅️ Ungerade = Links</strong> | <strong>➡️ Gerade = Rechts</strong>. Scan badge → Fahr links/rechts! <strong>📡 Offline?</strong> Scans queue automatically and sync when back online.</div></div>
+        </div>
+
+        <!-- WAVE PROGRESS -->
+        <div class="card">
+            <div class="ct"><div class="i" style="background:rgba(0,196,140,0.1)">📊</div>Wave Progress — Live</div>
+            <div id="waveProgressBars"></div>
+        </div>
+    </div>
+
+      <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="card"><div class="ct"><div class="i" style="background:rgba(59,130,246,0.1)">🌊</div>Wave Schedule</div><div class="wl" id="waveList"></div></div>
+        
+        <div class="card">
+            <div class="ct">
+                <div class="i" style="background:rgba(168,85,247,0.1)">📡</div>
+                Verbundene Geräte
+            </div>
+            <div id="deviceListContainer" class="device-list
+            Continuing from exactly where it cut off:
+
+<file name="index.html">
+<!-- PASTE THIS AFTER THE CUT-OFF POINT — Starting from deviceListContainer -->
+">
+                <div class="em">Lade Geräte...</div>
+            </div>
+        </div>
+
+        <div class="card" style="flex:1"><div class="ct" style="justify-content:space-between"><span style="display:flex;align-items:center;gap:9px"><span class="i" style="background:rgba(168,85,247,0.1)">📋</span>Scan History</span><button class="cbtn" onclick="clearLog()">Clear</button></div><div class="ll" id="logList"><div class="em">No scans yet</div></div></div>
+    </div>
+</div>
+
+<!-- WAVE MODAL -->
+<div class="ov" id="overlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="mod"><h3><span id="modalTitle">Wave</span><button class="mc" onclick="document.getElementById('overlay').classList.remove('show')">✕</button></h3>
+    <table><thead><tr><th>#</th><th>Badge</th><th>Transporter</th><th>Route</th><th>Location</th><th>DSP</th><th>Richtung</th></tr></thead><tbody id="modalBody"></tbody></table></div>
+</div>
+
+<!-- PASSWORD -->
+<div class="pw-overlay" id="pwOverlay">
+    <div class="pw-box">
+        <div style="font-size:40px;margin-bottom:12px">🔐</div>
+        <h2>Upload Access</h2>
+        <p>Enter the station password to upload data</p>
+        <input class="pw-input" id="pwInput" type="password" placeholder="••••" maxlength="20" autocomplete="off">
+        <div class="pw-err" id="pwErr"></div>
+        <div class="pw-btns">
+            <button class="pw-cancel" onclick="closePw()">Cancel</button>
+            <button class="pw-ok" onclick="checkPw()">🔓 Unlock</button>
+        </div>
+    </div>
+</div>
+
+<!-- UPLOAD -->
+<div class="up" id="uploadPanel">
+    <div class="uc">
+        <div class="uh"><div><h2>📤 Upload Daily Data</h2><p>Drop your Excel file. All sheets are read and cross-referenced automatically.<br><strong>☁️ Data syncs to ALL devices automatically via JSONBin.</strong></p></div><button class="mc" onclick="closeUpload()">✕</button></div>
+        <div class="dz" id="dropZone" onclick="document.getElementById('excelFile').click()"
+             ondragover="event.preventDefault();this.classList.add('dg')" ondragleave="this.classList.remove('dg')"
+             ondrop="event.preventDefault();this.classList.remove('dg');handleDrop(event)">
+            <div class="dzi" id="dropIcon">📁</div>
+            <div class="dzt" id="dropTitle">Drop your file here or click to browse</div>
+            <div class="dzs" id="dropSub">Supports .xlsx, .xls, .csv</div>
+            <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(event)">
+        </div>
+        <div id="rdst"></div>
+        <div class="ps" id="previewSection">
+            <h3>👁️ Data Preview</h3>
+            <div class="pss" id="previewStats"></div>
+            <div class="ptw"><table><thead><tr><th>#</th><th>Badge</th><th>Transporter</th><th>Wave</th><th>Time</th><th>Route</th><th>Location</th><th>DSP</th></tr></thead><tbody id="previewBody"></tbody></table></div>
+        </div>
+        <div class="ab">
+            <div style="display:flex;gap:8px"><button class="btn bc" onclick="closeUpload()">Cancel</button><button class="btn bd" onclick="clearSavedData()">🗑️ Reset All</button></div>
+            <button class="btn ba" id="applyBtn" disabled onclick="applyData()">✅ Apply & Sync to All Devices</button>
+        </div>
+    </div>
+</div>
+
+<!-- DEVICE SETUP MODAL -->
+<div class="setup-overlay" id="setupOverlay">
+    <div class="setup-box">
+        <div style="font-size:56px;margin-bottom:16px">👋</div>
+        <h2>Willkommen bei DNW1!</h2>
+        <p>Wie heißt du? Dein Name wird auf allen Geräten angezeigt.</p>
+        <div class="setup-input-wrap">
+            <span class="setup-icon">👤</span>
+            <input class="setup-input" id="setupNameInput" type="text" placeholder="z.B. Max, Sarah, Laptop-Büro..." maxlength="20" autocomplete="off">
+        </div>
+        <div class="setup-hint">💡 Du kannst den Namen jederzeit ändern (klick auf deinen Namen oben rechts)</div>
+        <button class="setup-btn" id="setupBtn" onclick="saveSetupName()">🚀 Los geht's!</button>
+    </div>
+</div>
+
+<!-- EDIT NAME MODAL -->
+<div class="ov" id="nameOverlay" onclick="if(event.target===this)closeNameEdit()">
+    <div class="mod" style="width:440px;text-align:center;padding:32px">
+        <div style="font-size:40px;margin-bottom:12px">👤</div>
+        <h3 style="justify-content:center;margin-bottom:6px">Gerätename ändern</h3>
+        <p style="font-size:12px;color:var(--text3);margin-bottom:20px">Dieser Name wird auf allen Geräten angezeigt</p>
+        <input class="pw-input" id="editNameInput" type="text" placeholder="Dein Name..." maxlength="20" autocomplete="off" style="letter-spacing:0;font-size:16px">
+        <div class="pw-btns" style="margin-top:16px">
+            <button class="pw-cancel" onclick="closeNameEdit()">Abbrechen</button>
+            <button class="pw-ok" onclick="saveEditName()">✅ Speichern</button>
+        </div>
+    </div>
+</div>
+
+<!-- QUEUE FLUSH TOAST (NEW) -->
+<div class="queue-flush-toast" id="queueFlushToast">
+    <span>📡</span>
+    <span id="queueFlushText">Synced 0 queued scans!</span>
+</div>
+<!-- FULLSCREEN SCAN MODE -->
+<div class="fs-overlay" id="fsOverlay">
+    <div class="fs-header">
+        <div class="fs-wave-info">
+            <span class="fs-wave-name" id="fsWaveName">--</span>
+            <span class="fs-wave-time" id="fsWaveTime">--:--</span>
+            <span class="fs-wave-dir" id="fsWaveDir" style="display:none"></span>
+        </div>
+        <div class="fs-clock" id="fsClock">--:--:--</div>
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="fs-progress-text" id="fsProgressText"><strong>0</strong> / 0 scanned</div>
+            <button class="fs-exit" onclick="exitFullscreen()">✕ ESC</button>
+        </div>
+    </div>
+
+    <div class="fs-body">
+        <!-- Scanner -->
+        <div class="fs-scanner">
+            <span class="fs-scanner-icon">📷</span>
+            <input class="fs-scanner-input" id="fsScanInput" placeholder="Scan badge here..." autocomplete="off">
+        </div>
+
+        <!-- Result -->
+        <div class="fs-result" id="fsResult">
+            <div class="fs-result-hero" id="fsResultHero">
+                <div class="fs-result-wave" id="fsResultWave">--</div>
+                <div class="fs-result-time" id="fsResultTime">--:--</div>
+            </div>
+        </div>
+
+        <!-- Direction -->
+        <div class="fs-direction" id="fsDirection">
+            <div class="fs-direction-text" id="fsDirectionText">⬅️ FAHR NACH LINKS ⬅️</div>
+            <div class="fs-direction-sub" id="fsDirectionSub">CA_A8 • STG-C.8 • EMBH</div>
+        </div>
+
+        <!-- Info -->
+        <div class="fs-info" id="fsInfo" style="display:none">
+            <div class="fs-info-cell"><label>Badge</label><div class="val" id="fsBadge">--</div></div>
+            <div class="fs-info-cell"><label>Route</label><div class="val" id="fsRoute">--</div></div>
+            <div class="fs-info-cell"><label>Location</label><div class="val" id="fsLoc">--</div></div>
+            <div class="fs-info-cell"><label>DSP</label><div class="val" id="fsDSP">--</div></div>
+        </div>
+
+        <!-- Wave Progress -->
+        <div style="width:100%">
+            <div class="fs-progress-bar"><div class="fs-progress-fill" id="fsProgressFill" style="width:0%"></div></div>
+        </div>
+        <!-- Fullscreen Duplicate Warning -->
+        <div class="fs-dup-warning" id="fsDupWarning">
+            <div class="fs-dup-warning-title" id="fsDupTitle">⚠️ BEREITS GESCANNT!</div>
+            <div class="fs-dup-warning-info" id="fsDupInfo"></div>
+        </div>
+
+        <!-- Fullscreen Wave Alarm -->
+        <div class="fs-wave-alarm" id="fsWaveAlarm">
+            <div class="fs-wave-alarm-text" id="fsWaveAlarmText">🔔 Welle 3 in 10 Minuten!</div>
+            <div class="fs-wave-alarm-countdown" id="fsWaveAlarmCountdown">10:00</div>
+        </div>
+        <!-- Missing -->
+        <div class="fs-missing" id="fsMissing">
+            <div class="fs-missing-text" id="fsMissingText">⚠️ 5 drivers still missing</div>
+            <div class="fs-missing-sub" id="fsMissingSub">from current wave</div>
+        </div>
+
+        <!-- Recent scans -->
+        <div class="fs-recent">
+            <div class="fs-recent-title">Last Scans</div>
+            <div class="fs-recent-list" id="fsRecentList">
+                <div style="text-align:center;color:var(--text3);padding:16px;font-size:13px">No scans yet</div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// SAVE & LOAD SCAN DATA — PERSISTS ACROSS REFRESH
+// ============================================================
+function saveScanData() {
+    var today = new Date().toISOString().split('T')[0];
+    var data = {
+        date: today,
+        scannedBadges: scannedBadges,
+        scanLog: scanLog,
+        scanCount: scanCount
+    };
+    try {
+        localStorage.setItem('dnw1_scan_data', JSON.stringify(data));
+    } catch (e) {
+        console.log('Could not save scan data');
+    }
+}
+
+function loadScanData() {
+    try {
+        var saved = localStorage.getItem('dnw1_scan_data');
+        if (!saved) return;
+        var data = JSON.parse(saved);
+        var today = new Date().toISOString().split('T')[0];
+        if (data.date === today) {
+            scannedBadges = data.scannedBadges || {};
+            scanLog = data.scanLog || [];
+            scanCount = data.scanCount || 0;
+            renderLog();
+            renderWaveProgress();
+            updateStats();
+        } else {
+            localStorage.removeItem('dnw1_scan_data');
+            scannedBadges = {};
+            scanLog = [];
+            scanCount = 0;
+        }
+    } catch (e) {
+        console.log('Could not load scan data');
+    }
+}
+
+function resetScanData() {
+    scannedBadges = {};
+    scanLog = [];
+    scanCount = 0;
+    localStorage.removeItem('dnw1_scan_data');
+    // Also clear offline queue on reset
+    offlineQueue = [];
+    saveOfflineQueue();
+    updateQueueUI();
+    updateStats();
+    renderLog();
+    renderWaveProgress();
+        scanCounts = {};
+    localStorage.removeItem('dnw1_scan_counts');
+}
+
+// ============================================================
+// JSONBIN.IO CLOUD CONFIG
+// ============================================================
+var JSONBIN_KEY = "$2a$10$poxeUIrcc4sOPlegVwyRCuvjeDqQ/a7gF1mQ6br5BiEGh/CSylPMm";
+var JSONBIN_BIN = "69afd35ef3aefa4d159b9111";
+var JSONBIN_API = "https://api.jsonbin.io/v3/b/" + JSONBIN_BIN;
+
+// STATE
+var lastCloudHash = '';
+var lastScanHash = '';
+var syncInProgress = false;
+var scanSyncTimeout = null;
+var BADGE_MAP = {}, WAVES = [], parsedExcelData = null, scanCount = 0, scanLog = [];
+var scannedBadges = {};
+var voiceEnabled = true;
+var dirTimeout = null;
+
+// ============================================================
+// ★★★ OFFLINE SCAN QUEUE — NEW FEATURE ★★★
+// ============================================================
+var offlineQueue = [];
+var isOnline = navigator.onLine;
+var queueFlushInProgress = false;
+var QUEUE_STORAGE_KEY = 'dnw1_offline_queue';
+var QUEUE_FLUSH_INTERVAL = 5000; // Try flush every 5s when online
+var queueFlushTimer = null;
+
+// Load queue from localStorage on startup
+function loadOfflineQueue() {
+    try {
+        var saved = localStorage.getItem(QUEUE_STORAGE_KEY);
+        if (saved) {
+            var parsed = JSON.parse(saved);
+            var today = new Date().toISOString().split('T')[0];
+            // Only keep today's queued items
+            offlineQueue = (parsed || []).filter(function(item) {
+                return item.date === today;
+            });
+            if (offlineQueue.length !== (parsed || []).length) {
+                saveOfflineQueue(); // Clean up old entries
+            }
+        }
+    } catch (e) {
+        console.log('Could not load offline queue');
+        offlineQueue = [];
+    }
+    updateQueueUI();
+}
+
+// Save queue to localStorage
+function saveOfflineQueue() {
+    try {
+        localStorage.setItem(QUEUE_STORAGE_KEY, JSON.stringify(offlineQueue));
+    } catch (e) {
+        console.log('Could not save offline queue');
+    }
+}
+
+// Add a scan to the offline queue
+function enqueueScan(badge, wave, found, direction, time) {
+    var entry = {
+        badge: badge,
+        wave: wave,
+        found: found,
+        time: time || nowStr(),
+        dir: direction,
+        device: DEVICE_ID,
+        deviceName: DEVICE_NAME,
+        date: new Date().toISOString().split('T')[0],
+        queuedAt: Date.now()
+    };
+    offlineQueue.push(entry);
+    saveOfflineQueue();
+    updateQueueUI();
+    console.log('[QUEUE] Added scan: ' + badge + ' (queue size: ' + offlineQueue.length + ')');
+}
+
+// Flush the queue — push all queued scans to cloud
+function flushOfflineQueue() {
+    if (queueFlushInProgress) return;
+    if (offlineQueue.length === 0) return;
+    if (!navigator.onLine) return;
+
+    queueFlushInProgress = true;
+    var queueSize = offlineQueue.length;
+    console.log('[QUEUE] Flushing ' + queueSize + ' queued scans...');
+
+    readCloudRaw().then(function(data) {
+        if (!data) {
+            queueFlushInProgress = false;
+            return;
+        }
+
+        var today = new Date().toISOString().split('T')[0];
+
+        // Initialize scans section if missing or new day
+        if (!data.scans || data.scans.date !== today) {
+            data.scans = { date: today, scannedBadges: {}, log: [], devices: {} };
+        }
+
+        var cloudScans = data.scans.scannedBadges || {};
+        var cloudLog = data.scans.log || [];
+        var pushed = 0;
+
+        // Push all queued items
+        offlineQueue.forEach(function(entry) {
+            // Add to scannedBadges if found
+            if (entry.found && !cloudScans[entry.badge]) {
+                cloudScans[entry.badge] = {
+                    time: entry.time,
+                    device: entry.device,
+                    deviceName: entry.deviceName
+                };
+                pushed++;
+            }
+
+            // Add to log if not duplicate
+            var exists = cloudLog.some(function(cl) {
+                return cl.badge === entry.badge && cl.time === entry.time && cl.device === entry.device;
+            });
+            if (!exists) {
+                cloudLog.push({
+                    badge: entry.badge,
+                    wave: entry.wave,
+                    found: entry.found,
+                    time: entry.time,
+                    device: entry.device,
+                    deviceName: entry.deviceName,
+                    dir: entry.dir
+                });
+            }
+        });
+
+        // Update device heartbeat
+        if (!data.scans.devices) data.scans.devices = {};
+        data.scans.devices[DEVICE_ID] = {
+            name: DEVICE_NAME,
+            lastSeen: Date.now(),
+            scanCount: Object.keys(scannedBadges).length
+        };
+
+        data.scans.scannedBadges = cloudScans;
+        data.scans.log = cloudLog.slice(-200);
+        data.scans.lastUpdate = Date.now();
+
+        return writeCloudRaw(data).then(function(ok) {
+            queueFlushInProgress = false;
+            if (ok) {
+                var flushedCount = offlineQueue.length;
+                offlineQueue = []; // Clear queue
+                saveOfflineQueue();
+                updateQueueUI();
+                lastScanHash = simpleHash(JSON.stringify(cloudScans));
+
+                console.log('[QUEUE] ✅ Flushed ' + flushedCount + ' scans successfully');
+
+                // Show flush notification
+                showQueueFlushToast(flushedCount);
+                showToast('📡 Synced ' + flushedCount + ' offline scans!', 'success');
+
+                // Update UI
+                renderWaveProgress();
+                updateStats();
+                if (data.scans.devices) updateDeviceIndicator(data.scans.devices);
+            } else {
+                console.log('[QUEUE] ❌ Cloud write failed, keeping queue');
+            }
+        });
+    }).catch(function(err) {
+        queueFlushInProgress = false;
+        console.log('[QUEUE] ❌ Flush failed:', err);
+    });
+}
+
+// Show the green "flushed" toast
+function showQueueFlushToast(count) {
+    var el = document.getElementById('queueFlushToast');
+    document.getElementById('queueFlushText').textContent = '📡 Synced ' + count + ' offline scan' + (count !== 1 ? 's' : '') + '!';
+    el.classList.add('show');
+    setTimeout(function() { el.classList.remove('show'); }, 4000);
+}
+
+// Update all queue-related UI elements
+function updateQueueUI() {
+    var count = offlineQueue.length;
+    var banner = document.getElementById('offlineBanner');
+    var badge = document.getElementById('queueBadge');
+    var badgeNum = document.getElementById('queueBadgeNum');
+    var bannerCount = document.getElementById('offlineQueueCount');
+    var onlineChip = document.getElementById('onlineChip');
+    var onlineDot = document.getElementById('onlineDot');
+    var onlineText = document.getElementById('onlineStatus');
+
+    // Offline banner
+    if (!isOnline) {
+        banner.classList.add('show');
+        bannerCount.textContent = count + ' queued';
+        // Shift main content down
+        document.querySelector('.stats-bar').style.marginTop = '42px';
+    } else {
+        banner.classList.remove('show');
+        document.querySelector('.stats-bar').style.marginTop = '';
+    }
+
+    // Queue badge in header
+    if (count > 0) {
+        badge.classList.add('show');
+        badgeNum.textContent = count;
+    } else {
+        badge.classList.remove('show');
+    }
+
+    // Online status chip
+    if (onlineChip) {
+        onlineChip.classList.remove('offline-mode', 'has-queue');
+        if (!isOnline) {
+            onlineChip.classList.add('offline-mode');
+            onlineText.textContent = 'Offline';
+            onlineDot.style.background = 'var(--red)';
+            onlineDot.style.animation = 'none';
+        } else if (count > 0) {
+            onlineChip.classList.add('has-queue');
+            onlineText.textContent = 'Syncing ' + count + '...';
+            onlineDot.style.background = 'var(--accent)';
+            onlineDot.style.animation = 'pulse 1s infinite';
+        } else {
+            onlineText.textContent = 'Online';
+            onlineDot.style.background = 'var(--green)';
+            onlineDot.style.animation = 'pulse 2s infinite';
+        }
+    }
+}
+
+// ====== ONLINE/OFFLINE EVENT LISTENERS ======
+window.addEventListener('online', function() {
+    console.log('[NETWORK] 🟢 Back online!');
+    isOnline = true;
+    updateQueueUI();
+
+    // Flush queue after short delay (let connection stabilize)
+    setTimeout(function() {
+        if (offlineQueue.length > 0) {
+            showToast('🔄 Back online! Syncing ' + offlineQueue.length + ' queued scans...', 'success');
+            flushOfflineQueue();
+        } else {
+            showToast('🟢 Back online!', 'success');
+        }
+    }, 1500);
+
+    // Also do a full sync
+    setTimeout(function() {
+        checkForUpdates();
+        sendHeartbeat();
+    }, 3000);
+});
+
+window.addEventListener('offline', function() {
+    console.log('[NETWORK] 🔴 Gone offline!');
+    isOnline = false;
+    updateQueueUI();
+    showToast('📡 Offline — scans will be queued', 'error');
+});
+// Periodic queue flush attempt (every 5s when there are items)
+function startQueueFlushTimer() {
+    if (queueFlushTimer) clearInterval(queueFlushTimer);
+    queueFlushTimer = setInterval(function() {
+        if (navigator.onLine && offlineQueue.length > 0 && !queueFlushInProgress) {
+            flushOfflineQueue();
+        }
+    }, QUEUE_FLUSH_INTERVAL);
+}
+
+// ============================================================
+// DEVICE IDENTITY
+// ============================================================
+var DEVICE_ID = (function() {
+    var id = localStorage.getItem('dnw1_device_id');
+    if (!id) {
+        id = 'D-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        localStorage.setItem('dnw1_device_id', id);
+    }
+    return id;
+})();
+
+var DEVICE_NAME = localStorage.getItem('dnw1_device_name') || '';
+
+function needsSetup() {
+    return !DEVICE_NAME || DEVICE_NAME.length === 0;
+}
+
+function showSetupScreen() {
+    var overlay = document.getElementById('setupOverlay');
+    overlay.classList.add('show');
+    scanInput.blur();
+    var input = document.getElementById('setupNameInput');
+    var guessName = '';
+    try {
+        var ua = navigator.userAgent || '';
+        if (ua.includes('Windows')) guessName = 'Windows-PC';
+        else if (ua.includes('Mac')) guessName = 'MacBook';
+        else if (ua.includes('Linux')) guessName = 'Linux-PC';
+        else if (ua.includes('Android')) guessName = 'Android';
+        else if (ua.includes('iPhone')) guessName = 'iPhone';
+        else if (ua.includes('iPad')) guessName = 'iPad';
+    } catch(e) {}
+    input.placeholder = guessName ? 'z.B. ' + guessName + ', Max, Büro-Links...' : 'Dein Name...';
+    setTimeout(function() { scanInput.blur(); input.focus(); }, 100);
+    setTimeout(function() { scanInput.blur(); input.focus(); }, 300);
+    setTimeout(function() { scanInput.blur(); input.focus(); }, 600);
+    input.addEventListener('blur', function setupBlurHandler() {
+        if (overlay.classList.contains('show')) {
+            setTimeout(function() { if (overlay.classList.contains('show')) input.focus(); }, 50);
+        } else { input.removeEventListener('blur', setupBlurHandler); }
+    });
+    input.addEventListener('input', function() {
+        document.getElementById('setupBtn').disabled = input.value.trim().length < 1;
+    });
+    input.addEventListener('keydown', function(e) {
+        e.stopPropagation();
+        if (e.key === 'Enter' && input.value.trim().length >= 1) saveSetupName();
+    });
+    document.getElementById('setupBtn').disabled = true;
+}
+
+function saveSetupName() {
+    var raw = document.getElementById('setupNameInput').value.trim();
+    if (raw.length < 1) return;
+    var name = raw.replace(/\S+/g, function(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+    DEVICE_NAME = name;
+    localStorage.setItem('dnw1_device_name', name);
+    document.getElementById('setupOverlay').classList.remove('show');
+    updateUserBadge();
+    sendHeartbeat();
+    showToast('👋 Willkommen, ' + name + '!', 'success');
+    if (voiceEnabled) setTimeout(function() { speak('Willkommen ' + name, 'de-DE'); }, 500);
+    setTimeout(function() { scanInput.focus(); }, 400);
+}
+
+function openNameEdit() {
+    document.getElementById('nameOverlay').classList.add('show');
+    scanInput.blur();
+    var input = document.getElementById('editNameInput');
+    input.value = DEVICE_NAME;
+    setTimeout(function() { scanInput.blur(); input.focus(); input.select(); }, 100);
+    input.addEventListener('blur', function editBlurHandler() {
+        var overlay = document.getElementById('nameOverlay');
+        if (overlay.classList.contains('show')) {
+            setTimeout(function() { if (overlay.classList.contains('show')) input.focus(); }, 50);
+        } else { input.removeEventListener('blur', editBlurHandler); }
+    });
+    input.onkeydown = function(e) {
+        e.stopPropagation();
+        if (e.key === 'Enter') saveEditName();
+        if (e.key === 'Escape') closeNameEdit();
+    };
+}
+
+function closeNameEdit() {
+    document.getElementById('nameOverlay').classList.remove('show');
+    setTimeout(function() { scanInput.focus(); }, 100);
+}
+
+function saveEditName() {
+    var raw = document.getElementById('editNameInput').value.trim();
+    if (raw.length < 1) return;
+    var name = raw.replace(/\S+/g, function(word) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+    var oldName = DEVICE_NAME;
+    DEVICE_NAME = name;
+    localStorage.setItem('dnw1_device_name', name);
+    closeNameEdit();
+    updateUserBadge();
+    sendHeartbeat();
+    showToast('✅ Name geändert: ' + oldName + ' → ' + name, 'success');
+}
+
+function updateUserBadge() {
+    var nameEl = document.getElementById('userBadgeName');
+    var avatarEl = document.getElementById('userAvatar');
+    if (nameEl) nameEl.textContent = DEVICE_NAME || '--';
+    if (avatarEl && DEVICE_NAME) avatarEl.textContent = DEVICE_NAME.charAt(0).toUpperCase();
+}
+
+// ============================================================
+// DEFAULT DATA
+// ============================================================
+var DEFAULT_BADGE_MAP = {
+"12479373":{id:"A3N94EOMBCCWSH",wave:"SA Early",t:0.2917,route:"SA_A33",loc:"STG-C14",dsp:"H&G"},
+"12721685":{id:"A54F48QY3FX4L",wave:"SA Early",t:0.2917,route:"SA_A34",loc:"STG-B02",dsp:"H&G"},
+"12049684":{id:"A1L1I86QLVAR0M",wave:"SA Early",t:0.2917,route:"SA_A1",loc:"STG-C06",dsp:"FRLG"},
+"13052194":{id:"A16VCQQYGR8828",wave:"SA Early",t:0.2917,route:"SA_A2",loc:"STG-B04",dsp:"FRLG"},
+"14303579":{id:"A2CY8NTFW512NN",wave:"SA Early",t:0.2917,route:"SA_A3",loc:"STG-C08",dsp:"ELGM"},
+"12913247":{id:"AM7AHK7CY9687",wave:"SA Early",t:0.2917,route:"SA_A7",loc:"STG-C13",dsp:"ELGM"},
+"11814798":{id:"A3AUEUNZEO1CTL",wave:"SA Early",t:0.2917,route:"SA_A11",loc:"STG-B03",dsp:"EMBH"},
+"11875729":{id:"A1OGL94VCG6HBZ",wave:"SA Early",t:0.2917,route:"SA_A13",loc:"STG-C15",dsp:"EMBH"},
+"11636700":{id:"A2WZ6A88XJRYNC",wave:"SA Early",t:0.2917,route:"SA_A12",loc:"STG-B01",dsp:"EMBH"},
+"11777514":{id:"A3E86RPTZVJT2B",wave:"SA Early",t:0.3021,route:"SA_A4",loc:"STG-C11",dsp:"ELGM"},
+"12093507":{id:"AO69SWW35WX6P",wave:"SA Early",t:0.3021,route:"SA_A5",loc:"STG-C04",dsp:"ELGM"},
+"11263833":{id:"A2JUTL257VG819",wave:"SA Early",t:0.3021,route:"SA_A6",loc:"STG-C12",dsp:"ELGM"},
+"14720280":{id:"A1VKQEQIOOS6SJ",wave:"SA Early",t:0.3021,route:"SA_A8",loc:"STG-B11",dsp:"ELGM"},
+"14180705":{id:"A2GA4SYC7SSO6C",wave:"SA Early",t:0.3021,route:"SA_A9",loc:"STG-B06",dsp:"ELGM"},
+"13801490":{id:"A2X2ZNBL5VH8ER",wave:"SA Early",t:0.3021,route:"SA_A10",loc:"STG-B05",dsp:"ELGM"},
+"13964537":{id:"A1X926A6R6SSH4",wave:"Welle 1",t:0.4236,route:"CA_A50",loc:"STG-C.12",dsp:"FRLG"},
+"14687469":{id:"A17PZ1SMJMRK3H",wave:"Welle 1",t:0.4236,route:"CA_A53",loc:"STG-C.10",dsp:"FRLG"},
+"13438188":{id:"A1371X5WXJQ6RB",wave:"Welle 1",t:0.4236,route:"CA_A54",loc:"STG-C.11",dsp:"FRLG"},
+"12024080":{id:"AHO17KDPI4YKZ",wave:"Welle 1",t:0.4236,route:"CA_A57",loc:"STG-B.5",dsp:"FRLG"},
+"14616049":{id:"A2U24QWZWUFKOF",wave:"Welle 1",t:0.4236,route:"CA_A56",loc:"STG-B.4",dsp:"FRLG"},
+"14643285":{id:"A1I69101E3CTLS",wave:"Welle 1",t:0.4236,route:"CA_A59",loc:"STG-B.3",dsp:"FRLG"},
+"14646699":{id:"A3IEDYOL50F3GZ",wave:"Welle 1",t:0.4236,route:"CA_A58",loc:"STG-B.6",dsp:"FRLG"},
+"13824922":{id:"A2BSZ9URH1AHII",wave:"Welle 1",t:0.4236,route:"CA_A39",loc:"STG-C.6",dsp:"FRLG"},
+"13696115":{id:"A2RN2T8OU0ZZ6Z",wave:"Welle 1",t:0.4236,route:"CA_A31",loc:"STG-B.7",dsp:"FRLG"},
+"13696357":{id:"A27I1X85K7Y0YD",wave:"Welle 1",t:0.4236,route:"CA_A33",loc:"STG-C.7",dsp:"FRLG"},
+"12263884":{id:"A1XS7U0N4VM3FY",wave:"Welle 1",t:0.4236,route:"CA_A32",loc:"STG-B.8",dsp:"FRLG"},
+"13819824":{id:"A2MJ5CRQN111G0",wave:"Welle 1",t:0.4236,route:"CA_A35",loc:"STG-C.8",dsp:"FRLG"},
+"14745344":{id:"APG2OYZ2OMOR6",wave:"Welle 1",t:0.4236,route:"CA_A37",loc:"STG-C.5",dsp:"FRLG"},
+"15059463":{id:"A10CWF94TCLFQW",wave:"Welle 1",t:0.4236,route:"CA_A36",loc:"STG-C.9",dsp:"FRLG"},
+"354525":{id:"AEL9T6OY4M4BC",wave:"Welle 1",t:0.4236,route:"CA_A49",loc:"STG-C.14",dsp:"FRLG"},
+"12164305":{id:"A2P061L79YH7FE",wave:"Welle 1",t:0.4236,route:"CA_A40",loc:"STG-C.1",dsp:"FRLG"},
+"12046822":{id:"A3M114TOUG3294",wave:"Welle 1",t:0.4236,route:"CA_A42",loc:"STG-C.3",dsp:"FRLG"},
+"11473129":{id:"A94OXI0UE8ETM",wave:"Welle 1",t:0.4236,route:"CA_A41",loc:"STG-C.2",dsp:"FRLG"},
+"14721291":{id:"AHQA5CJX1K187",wave:"Welle 1",t:0.4236,route:"CA_A44",loc:"STG-C.15",dsp:"FRLG"},
+"12302370":{id:"A2I6M8UYTJNAX9",wave:"Welle 1",t:0.4236,route:"CA_A43",loc:"STG-C.4",dsp:"FRLG"},
+"14258108":{id:"A1NPZF7GLCUF5C",wave:"Welle 1",t:0.4236,route:"CA_A46",loc:"STG-B.1",dsp:"FRLG"},
+"13472403":{id:"A7TDF7OX1CJCG",wave:"Welle 1",t:0.4236,route:"CA_A45",loc:"STG-B.9",dsp:"FRLG"},
+"12718049":{id:"AR2HY7KZBDEDO",wave:"Welle 1",t:0.4236,route:"CA_A48",loc:"STG-C.13",dsp:"FRLG"},
+"12836581":{id:"ATLE2JWG0JSFZ",wave:"Welle 1",t:0.4236,route:"CA_A47",loc:"STG-B.2",dsp:"FRLG"}
+};
+
+// ============================================================
+// VOICE SYSTEM
+// ============================================================
+function getDirection(waveName) {
+    var name = String(waveName || '').trim();
+    var match = name.match(/(\d+)/);
+    if (match) {
+        var num = parseInt(match[1]);
+      if (num % 2 === 0) return { dir: 'rechts', symbol: '👉➡️👉', text: 'FAHR NACH RECHTS' };
+else return { dir: 'links', symbol: '👈⬅️👈', text: 'FAHR NACH LINKS' };
+    }
+    if (name.toLowerCase().includes('sa') || name.toLowerCase().includes('early')) {
+        return { dir: 'links', symbol: '👈⬅️👈', text: 'GEH NACH LINKS' };
+    }
+    return { dir: '', symbol: '', text: '' };
+}
+
+function toggleVoice() {
+    voiceEnabled = !voiceEnabled;
+    var btn = document.getElementById('voiceBtn');
+    btn.textContent = voiceEnabled ? '🔊' : '🔇';
+    btn.className = voiceEnabled ? 'icon-btn voice-on' : 'icon-btn';
+    localStorage.setItem('dnw1_voice', voiceEnabled ? 'on' : 'off');
+    showToast(voiceEnabled ? '🔊 Voice ON' : '🔇 Voice OFF', 'success');
+}
+
+function speak(text, lang) {
+    if (!voiceEnabled || !('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    var msg = new SpeechSynthesisUtterance(text);
+    msg.lang = lang || 'de-DE';
+       msg.rate = 0.9;
+    msg.pitch = 1.0;
+    msg.volume = 1.0; // Max browser allows
+    var voices = speechSynthesis.getVoices();
+    for (var i = 0; i < voices.length; i++) {
+        if (voices[i].lang.startsWith('de')) { msg.voice = voices[i]; break; }
+    }
+    speechSynthesis.speak(msg);
+}
+
+if ('speechSynthesis' in window) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = function() { speechSynthesis.getVoices(); };
+}
+
+function announceDriver(driver, found) {
+    if (!found) return;
+    var direction = getDirection(driver.wave);
+    var wave = driver.wave || 'unbekannt';
+    if (direction.dir) speak(wave + ', fahr ' + direction.dir, 'de-DE');
+    else speak(wave, 'de-DE');
+}
+
+// ============================================================
+// DIRECTION BANNER
+// ============================================================
+function showDirectionBanner(driver, direction) { }
+function hideDirectionBanner() { }
+
+function showDirectionResult(driver, direction) {
+    var el = document.getElementById('dirResult');
+    if (!direction.dir) { el.className = 'dir-result'; return; }
+    el.className = 'dir-result show ' + direction.dir;
+    if (direction.dir === 'links') document.getElementById('dirResultText').textContent = '⬅️👈 FAHR NACH LINKS 👈⬅️';
+else document.getElementById('dirResultText').textContent = '➡️👉 FAHR NACH RECHTS 👉➡️';
+    document.getElementById('dirResultSub').textContent = driver.wave + ' • ' + (driver.loc || '--') + ' • ' + (driver.route || '--');
+}
+
+// ============================================================
+// HASH
+// ============================================================
+function simpleHash(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash.toString(36);
+}
+
+// ============================================================
+// CLOUD SYNC — WITH OFFLINE QUEUE INTEGRATION
+// ============================================================
+function readCloudRaw() {
+    return fetch(JSONBIN_API + '/latest', {
+        headers: { 'X-Master-Key': JSONBIN_KEY }
+    })
+    .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
+    .then(function(response) { return response.record || {}; })
+    .catch(function(err) { console.error('Cloud read failed:', err); return null; });
+}
+
+function writeCloudRaw(data) {
+    return fetch(JSONBIN_API, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_KEY },
+        body: JSON.stringify(data)
+    })
+    .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return true;
+    })
+    .catch(function(err) { console.error('Cloud write failed:', err); return false; });
+}
+
+function saveToCloud(badgeData) {
+    return readCloudRaw().then(function(existing) {
+        var payload = existing || {};
+        payload.badges = badgeData;
+              payload.uploadedAt = new Date().toISOString();
+        payload.uploadedBy = DEVICE_NAME || DEVICE_ID;
+        payload.uploadedByDevice = DEVICE_ID;
+        payload.count = Object.keys(badgeData).length;
+        payload.version = Date.now();
+        if (!payload.scans) payload.scans = { date: '', scannedBadges: {}, log: [], devices: {} };
+        return writeCloudRaw(payload);
+    }).then(function(ok) {
+        if (ok) lastCloudHash = simpleHash(JSON.stringify(badgeData));
+        return ok;
+    });
+}
+
+function loadFromCloud() {
+    return readCloudRaw().then(function(data) {
+        if (data && data.badges && Object.keys(data.badges).length > 0) return data;
+        return null;
+    });
+}
+
+// ============================================================
+// SCAN SYNC — NOW WITH OFFLINE QUEUE FALLBACK
+// ============================================================
+function syncScansToCloud() {
+    if (scanSyncTimeout) clearTimeout(scanSyncTimeout);
+    scanSyncTimeout = setTimeout(function() { doScanSync(); }, 2000);
+}
+
+function doScanSync() {
+    if (!navigator.onLine) {
+        console.log('[SYNC] Offline — scan already queued');
+        return;
+    }
+
+    var today = new Date().toISOString().split('T')[0];
+
+    readCloudRaw().then(function(data) {
+        if (!data) {
+            console.log('[SYNC] Cloud unreachable, relying on queue');
+            return;
+        }
+
+        if (!data.scans || data.scans.date !== today) {
+            data.scans = { date: today, scannedBadges: {}, log: [], devices: {} };
+        }
+
+        var cloudScans = data.scans.scannedBadges || {};
+        var cloudLog = data.scans.log || [];
+        var changed = false;
+
+        // Upload our local scans that cloud doesn't have
+        Object.keys(scannedBadges).forEach(function(badge) {
+            if (!cloudScans[badge]) {
+                var info = scannedBadges[badge];
+                cloudScans[badge] = {
+                    time: (typeof info === 'object' && info.time) ? info.time : nowStr(),
+                    device: (typeof info === 'object' && info.device) ? info.device : DEVICE_ID,
+                    deviceName: (typeof info === 'object' && info.deviceName) ? info.deviceName : DEVICE_NAME
+                };
+                changed = true;
+            }
+        });
+
+        // Upload log entries
+        scanLog.forEach(function(entry) {
+            var exists = cloudLog.some(function(cl) {
+                return cl.badge === entry.badge && cl.time === entry.time;
+            });
+            if (!exists) {
+                cloudLog.push({
+                    badge: entry.badge, wave: entry.wave, found: entry.found,
+                    time: entry.time, device: entry.device || DEVICE_ID,
+                    deviceName: entry.deviceName || DEVICE_NAME, dir: entry.dir
+                });
+                changed = true;
+            }
+        });
+
+        // Pull cloud scans we don't have — PRESERVE who scanned
+        var newFromCloud = 0;
+        Object.keys(cloudScans).forEach(function(badge) {
+            if (!scannedBadges[badge]) {
+                scannedBadges[badge] = {
+                    device: cloudScans[badge].device || 'unknown',
+                    deviceName: cloudScans[badge].deviceName || '?',
+                    time: cloudScans[badge].time || ''
+                };
+                newFromCloud++;
+            }
+        });
+
+        // Pull cloud log entries
+        cloudLog.forEach(function(cl) {
+            var exists = scanLog.some(function(local) {
+                return local.badge === cl.badge && local.time === cl.time;
+            });
+            if (!exists) {
+                scanLog.push({
+                    badge: cl.badge, wave: cl.wave, found: cl.found, time: cl.time,
+                    dir: cl.dir, device: cl.device, deviceName: cl.deviceName || '?'
+                });
+            }
+        });
+
+        scanLog.sort(function(a, b) { return b.time.localeCompare(a.time); });
+        if (scanLog.length > 100) scanLog = scanLog.slice(0, 100);
+
+        if (!data.scans.devices) data.scans.devices = {};
+        
+        // Count MY scans accurately
+        var myScanCount = 0;
+        Object.values(scannedBadges).forEach(function(info) {
+            if (typeof info === 'object' && info.device === DEVICE_ID) myScanCount++;
+            else if (info === true) myScanCount++; // legacy format = mine
+        });
+        
+        data.scans.devices[DEVICE_ID] = {
+            name: DEVICE_NAME, lastSeen: Date.now(), scanCount: myScanCount
+        };
+
+        data.scans.scannedBadges = cloudScans;
+        data.scans.log = cloudLog.slice(-200);
+        data.scans.lastUpdate = Date.now();
+
+        if (changed || newFromCloud > 0) {
+            writeCloudRaw(data).then(function(ok) {
+                if (ok) {
+                    if (offlineQueue.length > 0) {
+                        var beforeCount = offlineQueue.length;
+                        offlineQueue = offlineQueue.filter(function(qe) { return !cloudScans[qe.badge]; });
+                        if (offlineQueue.length < beforeCount) { saveOfflineQueue(); updateQueueUI(); }
+                    }
+                    if (newFromCloud > 0) showToast('🔄 +' + newFromCloud + ' scans from other devices', 'success');
+                }
+                lastScanHash = simpleHash(JSON.stringify(cloudScans));
+                saveScanData(); renderLog(); renderWaveProgress(); updateStats();
+                updateDeviceIndicator(data.scans.devices);
+            });
+        } else {
+            if (newFromCloud > 0) { saveScanData(); renderLog(); renderWaveProgress(); updateStats(); }
+            updateDeviceIndicator(data.scans.devices);
+        }
+    }).catch(function(err) {
+        console.log('[SYNC] Failed, queue will retry:', err.message);
+    });
+}
+
+function pullScansFromCloud() {
+    if (syncInProgress) return;
+    if (!navigator.onLine) return; // Don't try when offline
+    var today = new Date().toISOString().split('T')[0];
+
+    readCloudRaw().then(function(data) {
+        if (!data || !data.scans || data.scans.date !== today) return;
+        var cloudScans = data.scans.scannedBadges || {};
+        var newScanHash = simpleHash(JSON.stringify(cloudScans));
+        if (newScanHash === lastScanHash) {
+            if (data.scans.devices) updateDeviceIndicator(data.scans.devices);
+            return;
+        }
+        var newFromCloud = 0;
+        Object.keys(cloudScans).forEach(function(badge) {
+            if (!scannedBadges[badge]) { scannedBadges[badge] = true; newFromCloud++; }
+        });
+        var cloudLog = data.scans.log || [];
+        cloudLog.forEach(function(cl) {
+            var exists = scanLog.some(function(local) {
+                return local.badge === cl.badge && local.time === cl.time;
+            });
+            if (!exists) {
+                scanLog.push({
+                    badge: cl.badge, wave: cl.wave, found: cl.found, time: cl.time,
+                    dir: cl.dir, device: cl.device, deviceName: cl.deviceName || '?'
+                });
+            }
+        });
+        scanLog.sort(function(a, b) { return b.time.localeCompare(a.time); });
+        if (scanLog.length > 100) scanLog = scanLog.slice(0, 100);
+        lastScanHash = newScanHash;
+        if (newFromCloud > 0) {
+            saveScanData(); renderLog(); renderWaveProgress(); updateStats();
+            showToast('📡 +' + newFromCloud + ' scans synced from cloud', 'success');
+        }
+        if (data.scans.devices) updateDeviceIndicator(data.scans.devices);
+    });
+}
+
+function sendHeartbeat() {
+    if (!navigator.onLine) return; // Skip when offline
+    readCloudRaw().then(function(data) {
+        if (!data) return;
+        var today = new Date().toISOString().split('T')[0];
+        if (!data.scans) data.scans = { date: today, scannedBadges: {}, log: [], devices: {} };
+        if (data.scans.date !== today) data.scans = { date: today, scannedBadges: {}, log: [], devices: {} };
+        if (!data.scans.devices) data.scans.devices = {};
+        var myScanCount = 0;
+Object.values(scannedBadges).forEach(function(info) {
+    if (typeof info === 'object' && info.device === DEVICE_ID) myScanCount++;
+    else if (info === true) myScanCount++;
+});
+data.scans.devices[DEVICE_ID] = { name: DEVICE_NAME, lastSeen: Date.now(), scanCount: myScanCount };
+        var now = Date.now();
+        var cleaned = {};
+        var seenNames = {};
+        var entries = Object.entries(data.scans.devices).sort(function(a, b) { return (b[1].lastSeen || 0) - (a[1].lastSeen || 0); });
+        entries.forEach(function(entry) {
+            var id = entry[0], d = entry[1];
+            if ((now - (d.lastSeen || 0)) >= 600000) return;
+            var nameKey = (d.name || id).toLowerCase().trim().replace(/\s+/g, ' ');
+            if (seenNames[nameKey]) {
+                var existingId = seenNames[nameKey];
+                var existingDevice = cleaned[existingId];
+                if (existingDevice) existingDevice.scanCount = Math.max(existingDevice.scanCount || 0, d.scanCount || 0);
+                return;
+            }
+            seenNames[nameKey] = id;
+            cleaned[id] = d;
+        });
+        data.scans.devices = cleaned;
+        writeCloudRaw(data);
+    });
+}
+
+function updateDeviceIndicator(devices) {
+    var el = document.getElementById('deviceIndicator');
+    if (!el) return;
+    if (!devices) { el.textContent = '1 Gerät'; return; }
+    var now = Date.now();
+    var activeDevices = [];
+    var seenNames = {};
+    var deviceEntries = Object.keys(devices).map(function(id) {
+        return { id: id, data: devices[id] };
+    }).sort(function(a, b) { return (b.data.lastSeen || 0) - (a.data.lastSeen || 0); });
+    deviceEntries.forEach(function(entry) {
+        var d = entry.data, id = entry.id;
+        if ((now - (d.lastSeen || 0)) >= 120000) return;
+        var nameKey = (d.name || id).toLowerCase().trim().replace(/\s+/g, ' ');
+        if (seenNames[nameKey]) {
+            var existing = seenNames[nameKey];
+            existing.scans = Math.max(existing.scans, d.scanCount || 0);
+            if ((d.lastSeen || 0) > existing.lastSeen) { existing.lastSeen = d.lastSeen; existing.name = d.name || id; }
+            if (id === DEVICE_ID) existing.isMe = true;
+            return;
+        }
+        var deviceObj = { id: id, name: d.name || id, scans: d.scanCount || 0, lastSeen: d.lastSeen, isMe: id === DEVICE_ID };
+        seenNames[nameKey] = deviceObj;
+        activeDevices.push(deviceObj);
+    });
+    var chipEl = document.getElementById('deviceChip');
+    if (activeDevices.length <= 1) { el.textContent = '1 Gerät'; if (chipEl) chipEl.style.display = 'none'; }
+    else { el.textContent = activeDevices.length + ' Geräte'; if (chipEl) chipEl.style.display = 'flex'; }
+    var tipLines = activeDevices.map(function(d) { return d.name + (d.isMe ? ' (Du)' : '') + ' — ' + d.scans + ' Scans'; });
+    if (chipEl) chipEl.title = tipLines.join('\n');
+    renderDeviceList(activeDevices);
+}
+
+function renderDeviceList(devices) {
+    var container = document.getElementById('deviceListContainer');
+    if (!container) return;
+    if (!devices || devices.length === 0) { container.innerHTML = '<div class="em">Keine Geräte verbunden</div>'; return; }
+    container.innerHTML = '';
+    devices.sort(function(a, b) { if (a.isMe && !b.isMe) return -1; if (!a.isMe && b.isMe) return 1; return b.scans - a.scans; });
+    devices.forEach(function(d) {
+        var initial = d.name.charAt(0).toUpperCase();
+        var colors = ['#a855f7','#3b82f6','#10b981','#f59e0b','#ef4444','#ec4899','#06b6d4','#8b5cf6'];
+        var hash = 0;
+        var lowerName = d.name.toLowerCase().trim();
+        for (var i = 0; i < lowerName.length; i++) hash = ((hash << 5) - hash) + lowerName.charCodeAt(i);
+        var color = colors[Math.abs(hash) % colors.length];
+        var div = document.createElement('div');
+        div.className = 'device-row' + (d.isMe ? ' me' : '');
+        div.innerHTML =
+            '<div class="device-name">' +
+                '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,' + color + ',' + color + '80);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0">' + initial + '</div>' +
+                '<div>' +
+                    '<div style="font-weight:700;font-size:12px;color:var(--text)">' + d.name + (d.isMe ? ' <span style="font-size:9px;opacity:0.5">(Du)</span>' : '') + '</div>' +
+                    '<div style="font-size:9px;color:var(--text3)">' + d.scans + ' Scans</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="device-status online"></div>';
+        container.appendChild(div);
+    });
+}
+
+// ============================================================
+// BADGE DATA SYNC
+// ============================================================
+function checkForUpdates() {
+    if (syncInProgress) return;
+    if (!navigator.onLine) return; // Skip when offline
+    syncInProgress = true;
+
+    readCloudRaw().then(function(data) {
+        syncInProgress = false;
+        if (!data) return;
+        if (data.badges) {
+            var newHash = simpleHash(JSON.stringify(data.badges));
+            if (newHash !== lastCloudHash && Object.keys(data.badges).length > 0) {
+                BADGE_MAP = JSON.parse(JSON.stringify(data.badges));
+                lastCloudHash = newHash;
+                var today = new Date().toISOString().split('T')[0];
+                localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+                localStorage.setItem('dnw1_data_date', today);
+                if (data.version) localStorage.setItem('dnw1_data_version', String(data.version));
+                document.getElementById('dataBadge').textContent = '☁️ ' + today;
+                document.getElementById('dataBadge').className = 'dbadge on';
+                rebuildWaves(); updateStats(); renderWaveList(); renderWaveProgress();
+                showToast('🔄 Synced! ' + Object.keys(BADGE_MAP).length + ' drivers', 'success');
+                                if (data.uploadedAt) {
+                    var localUT = getUploadTime();
+                    var cloudUT = new Date(data.uploadedAt).getTime();
+                    var localUTms = localUT ? new Date(localUT).getTime() : 0;
+                    if (cloudUT > localUTms) {
+                        localStorage.setItem(UPLOAD_TIME_KEY, data.uploadedAt);
+                        if (data.uploadedBy) localStorage.setItem(UPLOAD_DEVICE_NAME_KEY, data.uploadedBy);
+                        if (data.uploadedByDevice) localStorage.setItem(UPLOAD_DEVICE_KEY, data.uploadedByDevice);
+                    }
+                }
+                updateUploadTimeDisplay();
+            }
+        }
+        var today = new Date().toISOString().split('T')[0];
+        if (data.scans && data.scans.date === today) {
+            var cloudScans = data.scans.scannedBadges || {};
+            var newScanHash = simpleHash(JSON.stringify(cloudScans));
+            if (newScanHash !== lastScanHash) {
+             var newFromCloud = 0;
+Object.keys(cloudScans).forEach(function(badge) {
+    if (!scannedBadges[badge]) {
+        scannedBadges[badge] = {
+            device: cloudScans[badge].device || 'unknown',
+            deviceName: cloudScans[badge].deviceName || '?',
+            time: cloudScans[badge].time || ''
+        };
+        newFromCloud++;
+    }
+});
+                var cloudLog = data.scans.log || [];
+                cloudLog.forEach(function(cl) {
+                    var exists = scanLog.some(function(local) { return local.badge === cl.badge && local.time === cl.time; });
+                    if (!exists) {
+                        scanLog.push({ badge: cl.badge, wave: cl.wave, found: cl.found, time: cl.time, dir: cl.dir, device: cl.device, deviceName: cl.deviceName || '?' });
+                    }
+                });
+                scanLog.sort(function(a, b) { return b.time.localeCompare(a.time); });
+                if (scanLog.length > 100) scanLog = scanLog.slice(0, 100);
+                lastScanHash = newScanHash;
+                if (newFromCloud > 0) { saveScanData(); renderLog(); renderWaveProgress(); updateStats(); }
+            }
+            if (data.scans.devices) updateDeviceIndicator(data.scans.devices);
+        }
+    }).catch(function() { syncInProgress = false; });
+}
+
+function manualSync() {
+    if (!navigator.onLine) {
+        showToast('📡 Offline — can\'t sync now. ' + offlineQueue.length + ' scans queued.', 'error');
+        return;
+    }
+    var btn = document.getElementById('syncBtn');
+    btn.classList.add('syncing');
+    loadFromCloud().then(function(data) {
+        btn.classList.remove('syncing');
+        if (data && data.badges && Object.keys(data.badges).length > 0) {
+            BADGE_MAP = JSON.parse(JSON.stringify(data.badges));
+            lastCloudHash = simpleHash(JSON.stringify(data.badges));
+            var today = new Date().toISOString().split('T')[0];
+            localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+            localStorage.setItem('dnw1_data_date', today);
+            if (data.version) localStorage.setItem('dnw1_data_version', String(data.version));
+            document.getElementById('dataBadge').textContent = '☁️ ' + today;
+            document.getElementById('dataBadge').className = 'dbadge on';
+            if (data.scans && data.scans.date === today) {
+              var cloudScans = data.scans.scannedBadges || {};
+Object.keys(cloudScans).forEach(function(badge) {
+    if (!scannedBadges[badge]) {
+        scannedBadges[badge] = {
+            device: cloudScans[badge].device || 'unknown',
+            deviceName: cloudScans[badge].deviceName || '?',
+            time: cloudScans[badge].time || ''
+        };
+    }
+});
+                lastScanHash = simpleHash(JSON.stringify(cloudScans));
+                if (data.scans.devices) updateDeviceIndicator(data.scans.devices);
+            }
+            rebuildWaves(); updateStats(); renderWaveList(); renderWaveProgress(); renderLog();
+            showToast('✅ Synced: ' + Object.keys(BADGE_MAP).length + ' drivers + scans', 'success');
+
+            // Also flush queue if any
+            if (offlineQueue.length > 0) {
+                setTimeout(flushOfflineQueue, 500);
+            }
+        } else {
+            showToast('ℹ️ No cloud data found', 'error');
+        }
+    }).catch(function() {
+        btn.classList.remove('syncing');
+        showToast('❌ Sync failed', 'error');
+    });
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function toggleTheme() {
+    var html = document.documentElement;
+    var isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+    document.getElementById('themeBtn').className = 'icon-btn';
+    localStorage.setItem('dnw1_theme', isDark ? 'light' : 'dark');
+}
+
+// ============================================================
+// PASSWORD
+// ============================================================
+var pwAction = '';
+function promptPasswordFor(action) {
+    pwAction = action;
+    document.getElementById('pwOverlay').classList.add('show');
+    var inp = document.getElementById('pwInput');
+    inp.value = ''; inp.classList.remove('err');
+    document.getElementById('pwErr').textContent = '';
+    setTimeout(function() { inp.focus() }, 100);
+}
+function closePw() {
+    document.getElementById('pwOverlay').classList.remove('show');
+    pwAction = '';
+    setTimeout(function() { scanInput.focus() }, 100);
+}
+function checkPw() {
+    var val = document.getElementById('pwInput').value.trim();
+    if (val === 'DNW1') {
+        var action = pwAction; closePw();
+        if (action === 'upload') openUpload();
+        else if (action === 'template') downloadTemplate();
+        else if (action === 'report') exportDailyReport();
+    } else {
+        document.getElementById('pwInput').classList.add('err');
+        document.getElementById('pwErr').textContent = '❌ Wrong password!';
+        setTimeout(function() { document.getElementById('pwInput').classList.remove('err'); }, 400);
+    }
+}
+document.addEventListener('keydown', function(e) {
+    if (document.getElementById('pwOverlay').classList.contains('show')) {
+        if (e.key === 'Enter') checkPw();
+        if (e.key === 'Escape') closePw();
+    }
+});
+
+// ============================================================
+// TIME HELPERS
+// ============================================================
+function parseTime(raw) {
+    if (raw == null || raw === '') return 0;
+    if (raw instanceof Date) return (raw.getHours() + raw.getMinutes() / 60) / 24;
+    if (typeof raw === 'number') {
+        if (raw >= 0 && raw < 1) return raw;
+        if (raw >= 1 && raw < 24) return raw / 24;
+        if (raw >= 100 && raw <= 2400) return (Math.floor(raw / 100) + (raw % 100) / 60) / 24;
+        if (raw > 100) { var d = new Date((raw - 25569) * 86400 * 1000); return (d.getHours() + d.getMinutes() / 60) / 24 }
+        return 0;
+    }
+    var s = String(raw).trim();
+    if (s.includes(':')) { var p = s.split(':'); return ((parseInt(p[0]) || 0) + (parseInt(p[1]) || 0) / 60) / 24 }
+    var n = parseFloat(s); if (!isNaN(n)) { if (n >= 0 && n < 1) return n; if (n >= 1 && n < 24) return n / 24 }
+    return 0;
+}
+function formatWave(name) { if (!name) return '--'; return name.replace(/([a-zA-Z])(\d)/g, '$1 $2'); }
+function timeStr(t) { if (!t) return '--:--'; 
+var   h = Math.floor(t * 24), m = Math.round((t * 24 - h) * 60); if (m === 60) { h++; m = 0 } return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') }
+function nowDec() { var n = new Date(); return (n.getHours() + n.getMinutes() / 60 + n.getSeconds() / 3600) / 24 }
+function nowStr() { var n = new Date(); return [n.getHours(), n.getMinutes(), n.getSeconds()].map(function(v) { return String(v).padStart(2, '0') }).join(':') }
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function showSt(html, type) {
+    var el = document.getElementById('rdst'); el.style.display = 'block';
+    el.style.background = type === 'err' ? 'rgba(255,71,87,0.1)' : type === 'ok' ? 'rgba(0,196,140,0.1)' : 'rgba(255,153,0,0.1)';
+    el.style.color = type === 'err' ? 'var(--red)' : type === 'ok' ? 'var(--green)' : 'var(--accent)';
+    el.style.border = '1px solid ' + (type === 'err' ? 'rgba(255,71,87,0.2)' : type === 'ok' ? 'rgba(0,196,140,0.2)' : 'rgba(255,153,0,0.2)');
+    el.innerHTML = html;
+}
+function showToast(msg, type) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast show ' + type; setTimeout(function() { t.classList.remove('show') }, 4000) }
+
+// ============================================================
+// CLEAN HELPERS
+// ============================================================
+function cleanBadge(raw) {
+    var b = String(raw || '').trim();
+    if (b.endsWith('.0')) b = b.slice(0, -2);
+    b = b.replace(/^0+/, '') || b;
+    if (!b || b === 'undefined' || b === 'null' || b === 'NaN' || b === '0' || b === 'N/A' || b === 'OFFBOARDED') return null;
+    return b;
+}
+function cleanDSP(raw) {
+    if (!raw) return '';
+    var s = String(raw).trim();
+    if (!s || s === '0' || s === 'N/A' || s === 'n/a' || s === '-' || s === 'undefined') return '';
+    
+    // Strip "DSP:" prefix (your Input Form uses "DSP:EMBH" format)
+    if (s.toUpperCase().startsWith('DSP:')) s = s.substring(4).trim();
+
+    // ★ REJECT Amazon transporter IDs (A1L7RJCQ67D14N)
+    if (/^A[A-Za-z0-9]{8,}$/i.test(s)) return '';
+
+    // ★ REJECT Route IDs (7427532-84, 7427532-120 etc.)
+    if (/^\d{4,}/.test(s)) return '';
+
+    // ★ REJECT status values from Status column
+    var sLow = s.toLowerCase().trim();
+    if (sLow === 'ready' || sLow === 'not ready' || sLow === 'overflow' || 
+        sLow === 'yes' || sLow === 'no' || sLow === 'dnw1' || sLow === 'x') return '';
+
+    // ★ REJECT strings with 3+ digits (route IDs, badge numbers etc.)
+    var digitCount = (s.match(/\d/g) || []).length;
+    if (digitCount >= 3) return '';
+
+    // ★ REJECT staging locations (STG-B04, STG-C.12)
+    if (/^STG/i.test(s)) return '';
+
+    // ★ REJECT route codes (CA_A84, SA_A12)
+    if (/^(CA|SA)[_\-]/i.test(s)) return '';
+
+    // Known DSP map
+    var lower = sLow.replace(/[^a-z0-9&äöüß]/g, '');
+    var dspMap = {
+        'bplu': 'BPLU', 'bplugmbh': 'BPLU',
+        'friendslogistik': 'FRLG', 'frlg': 'FRLG', 'friends': 'FRLG', 
+        'friendlogistik': 'FRLG', 'friendslogistikgmbh': 'FRLG', 
+        'friendlogistikgmbh': 'FRLG',
+        'exlog': 'ELGM', 'elgm': 'ELGM', 'exloggmbh': 'ELGM', 
+        'exlogistik': 'ELGM',
+        'emlgmbh': 'EMBH', 'embh': 'EMBH', 'eml': 'EMBH', 
+        'emllogistik': 'EMBH',
+        'h&g': 'H&G', 'hg': 'H&G', 'h&glogistik': 'H&G', 
+        'hundg': 'H&G', 'hglogistik': 'H&G', 'h&ggmbh': 'H&G', 
+        'hggmbh': 'H&G',
+        'i&a': 'IAFS', 'ia': 'IAFS', 'iafs': 'IAFS', 
+        'fastandsafe': 'IAFS', 'fastsafe': 'IAFS',
+        'iafastsafe': 'IAFS', 'ialogistik': 'IAFS', 
+        'i&afastsafe': 'IAFS', 'i&afastandsafelogisticsgmbh': 'IAFS',
+        'lplg': 'LPLG', 'lp': 'LPLG', 'lplogistik': 'LPLG',
+    };
+    if (dspMap[lower]) return dspMap[lower];
+    var keys = Object.keys(dspMap);
+    for (var i = 0; i < keys.length; i++) {
+        if (lower.includes(keys[i]) || keys[i].includes(lower)) return dspMap[keys[i]];
+    }
+
+    // Accept short uppercase codes (like H&G, BPLU)
+    if (/^[A-Z&]{2,6}$/.test(s)) return s;
+
+    // ★ REJECT everything else — only known DSP values are accepted
+    return '';
+}
+// ============================================================
+// EXCEL PARSER
+// ============================================================
+function findHeader(headers, searchTerms) {
+    var i, j;
+    for (i = 0; i < headers.length; i++) {
+        var low = headers[i].toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (j = 0; j < searchTerms.length; j++) {
+            var term = searchTerms[j].toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (low === term) return headers[i];
+        }
+    }
+    for (i = 0; i < headers.length; i++) {
+        var low2 = headers[i].toLowerCase().replace(/[^a-z0-9]/g, '');
+        for (j = 0; j < searchTerms.length; j++) {
+            var term2 = searchTerms[j].toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (low2.includes(term2)) return headers[i];
+        }
+    }
+    for (i = 0; i < headers.length; i++) {
+        var low3 = headers[i].toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (low3.length < 2) continue;
+        for (j = 0; j < searchTerms.length; j++) {
+            var term3 = searchTerms[j].toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (term3.includes(low3)) return headers[i];
+        }
+    }
+    return null;
+}
+
+function guessWave(t) {
+    if (!t) return 'Unknown';
+    var h = t * 24;
+    if (h < 9) return 'SA Early';
+    if (h < 10.7) return 'Welle 1';
+    if (h < 11) return 'Welle 2';
+    if (h < 11.5) return 'Welle 3';
+    if (h < 12) return 'Welle 4';
+    return 'Welle ' + (Math.floor(h - 9));
+}
+
+function parseWorkbook(workbook) {
+    var sheets = {};
+        // ★ DEBUG: Log all sheet names and their columns
+    console.log('=== EXCEL SHEETS ===');
+    workbook.SheetNames.forEach(function(name) {
+        sheets[name] = XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: '' });
+        var headers = sheets[name].length > 0 ? Object.keys(sheets[name][0]) : [];
+        console.log('Sheet: "' + name + '" — ' + sheets[name].length + ' rows — Columns:', headers);
+        if (sheets[name].length > 0) {
+            console.log('  Sample row 1:', JSON.stringify(sheets[name][0]));
+        }
+    });
+    workbook.SheetNames.forEach(function(name) {
+        sheets[name] = XLSX.utils.sheet_to_json(workbook.Sheets[name], { defval: '' });
+    });
+
+    var wellenSheet = null, wellenName = '';
+    for (var wi = 0; wi < workbook.SheetNames.length; wi++) {
+        var wn = workbook.SheetNames[wi];
+        var wl = wn.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (wl.includes('wellen') || wl.includes('wave')) {
+            if (sheets[wn].length > 0) { wellenSheet = sheets[wn]; wellenName = wn; break }
+        }
+    }
+
+    var inputSheet = null, inputName = '';
+    for (var ii = 0; ii < workbook.SheetNames.length; ii++) {
+        var iname = workbook.SheetNames[ii];
+        var il = iname.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (il.includes('input') || il.includes('form')) {
+            if (sheets[iname].length > 0) { inputSheet = sheets[iname]; inputName = iname; break }
+        }
+    }
+
+    var transporterSheet = null, transporterName = '';
+    for (var ti = 0; ti < workbook.SheetNames.length; ti++) {
+        var tname = workbook.SheetNames[ti];
+        var tl = tname.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (tl.includes('transporter') && !tl.includes('id')) {
+            if (sheets[tname].length > 0) { transporterSheet = sheets[tname]; transporterName = tname; break }
+        }
+    }
+
+    var result = {}, valid = 0, skipped = 0;
+    var wavesFound = new Set();
+
+    if (wellenSheet && wellenSheet.length > 0) {
+        var wHeaders = Object.keys(wellenSheet[0]);
+        var wColTransporter = findHeader(wHeaders, ['transporter id', 'transporterid', 'transporter']);
+        var wColBadge = findHeader(wHeaders, ['badgeid', 'badge', 'badge id', 'badge barcode']);
+        var wColTime = findHeader(wHeaders, ['dispatch time', 'dispatchtime', 'zeit', 'time', 'uhrzeit']);
+        var wColTimeNum = findHeader(wHeaders, ['dispatch time zah', 'dispatch time zahl', 'zeit zahl', 'time number']);
+        var wColWave = findHeader(wHeaders, ['welle', 'wave', 'wellen']);
+
+              var transporterLookup = {};
+        if (transporterSheet && transporterSheet.length > 0) {
+            var tHeaders = Object.keys(transporterSheet[0]);
+            var tColId = tHeaders[0];
+            for (var thi = 0; thi < tHeaders.length; thi++) {
+                var thLow = tHeaders[thi].toLowerCase();
+                if (thLow.includes('transporter') && thLow.includes('id')) { tColId = tHeaders[thi]; break; }
+                var tSample = String(transporterSheet[0][tHeaders[thi]] || '');
+                if (/^A[A-Z0-9]{10,}/.test(tSample) && thi === 0) { tColId = tHeaders[thi]; }
+            }
+            var tColCompany = findHeader(tHeaders, ['executed company name', 'company name', 'company', 'firma', 'unternehmen', 'dsp name']);
+            var tColShortcode = findHeader(tHeaders, ['executed company shortcode', 'shortcode', 'dsp', 'dsp code', 'code', 'kürzel']);
+            var tColBadge2 = findHeader(tHeaders, ['badge barcode', 'badge', 'badgeid', 'badge id', 'barcode']);
+
+            // ★ SMART DSP DETECTION: If headers didn't match, scan column CONTENT for known DSP values
+            if (!tColCompany && !tColShortcode) {
+                var knownDSPValues = ['frlg','elgm','embh','h&g','iafs','lplg','friends','exlog','eml','hg','ia'];
+                var bestDspCol = null;
+                var bestDspScore = 0;
+
+                for (var dci = 0; dci < tHeaders.length; dci++) {
+                    // Skip ID and badge columns
+                    if (tHeaders[dci] === tColId || tHeaders[dci] === tColBadge2) continue;
+                    var dspScore = 0;
+                    var checkRows = Math.min(transporterSheet.length, 30);
+
+                    for (var dri = 0; dri < checkRows; dri++) {
+                        var cellVal = String(transporterSheet[dri][tHeaders[dci]] || '').toLowerCase().trim();
+                        if (!cellVal) continue;
+                        // Skip if looks like transporter ID
+                        if (/^a[a-z0-9]{8,}$/i.test(cellVal)) continue;
+                        // Skip if looks like badge number
+                        if (/^\d{6,}$/.test(cellVal)) continue;
+                        // Check against known DSP names
+                        var cleanVal = cellVal.replace(/[^a-z0-9&]/g, '');
+                        for (var kdi = 0; kdi < knownDSPValues.length; kdi++) {
+                            if (cleanVal.includes(knownDSPValues[kdi]) || knownDSPValues[kdi].includes(cleanVal)) {
+                                dspScore += 3;
+                                break;
+                            }
+                        }
+                        // Also check if cleanDSP returns a known code
+                        var testClean = cleanDSP(transporterSheet[dri][tHeaders[dci]]);
+                        if (testClean && ['FRLG','ELGM','EMBH','H&G','IAFS','LPLG'].indexOf(testClean) >= 0) {
+                            dspScore += 5;
+                        }
+                    }
+
+                    if (dspScore > bestDspScore) {
+                        bestDspScore = dspScore;
+                        bestDspCol = tHeaders[dci];
+                    }
+                }
+
+                if (bestDspCol && bestDspScore >= 3) {
+                    console.log('[DSP] Found DSP column by content: "' + bestDspCol + '" (score: ' + bestDspScore + ')');
+                    tColCompany = bestDspCol;
+                }
+            }
+
+            console.log('[PARSER] Transporter columns — ID:', tColId, 'Company:', tColCompany, 'Shortcode:', tColShortcode, 'Badge:', tColBadge2);
+
+            transporterSheet.forEach(function(row) {
+                var tid = String(row[tColId] || '').trim();
+                if (!tid) return;
+                var sc = tColShortcode ? String(row[tColShortcode] || '').trim() : '';
+                var co = tColCompany ? String(row[tColCompany] || '').trim() : '';
+                var badge = tColBadge2 ? cleanBadge(row[tColBadge2]) : null;
+                var dsp = cleanDSP(sc) || cleanDSP(co);
+                if (!dsp) {
+                    for (var ci = 0; ci < tHeaders.length; ci++) {
+                        if (tHeaders[ci] === tColId || tHeaders[ci] === tColBadge2) continue;
+                        var val = String(row[tHeaders[ci]] || '').trim();
+                        var cleaned = cleanDSP(val);
+                        if (cleaned && cleaned.length >= 2 && cleaned.length <= 10 && !/^[0-9.]+$/.test(cleaned) && !/^A[A-Z0-9]{8,}/.test(val)) { dsp = cleaned; break; }
+                    }
+                }
+                var cleanId = tid.replace(/[^A-Z0-9]/gi, '');
+                transporterLookup[tid] = { dsp: dsp, badge: badge };
+                if (cleanId !== tid) transporterLookup[cleanId] = { dsp: dsp, badge: badge };
+            });
+        }
+
+        var routeByTransporter = {};
+        if (inputSheet && inputSheet.length > 0) {
+            var riHeaders = Object.keys(inputSheet[0]);
+            var riColRoute = findHeader(riHeaders, ['route', 'route id', 'routeid', 'tour', 'route code']);
+            var riColLoc = findHeader(riHeaders, ['location', 'loc', 'staging', 'standort', 'staging location', 'buffer', 'position']);
+            var riColType = findHeader(riHeaders, ['type', 'dsp', 'typ', 'company', 'firma', 'dsp name', 'dsp code', 'shortcode', 'carrier']);
+                    var transColForInput = null;
+            for (var hi = 0; hi < riHeaders.length; hi++) {
+                var hh = riHeaders[hi];
+                var hLow = hh.toLowerCase();
+                // ★ Added 'driver' (without 'id') to match your Excel's "Driver" column
+                if (hLow.includes('transporter') || hLow === 'driver' || hLow.includes('driver id') || hLow.includes('fahrer')) { transColForInput = hh; break; }
+                var samples = inputSheet.slice(0, 15).map(function(r) { return String(r[hh] || '') });
+                var transporterCount = samples.filter(function(v) { return /^A[A-Z0-9]{8,}/.test(v) }).length;
+                if (transporterCount >= 3) { transColForInput = hh; break; }
+            }
+            if (transColForInput) {
+                inputSheet.forEach(function(row) {
+                    var tid = String(row[transColForInput] || '').trim();
+                    var route = riColRoute ? String(row[riColRoute] || '').trim() : '';
+                    var loc = riColLoc ? String(row[riColLoc] || '').trim() : '';
+                    var dspRaw = riColType ? String(row[riColType] || '').trim() : '';
+                    if (!tid) return;
+                    var dsp = cleanDSP(dspRaw);
+                    if (!dsp) {
+                        for (var ci = 0; ci < riHeaders.length; ci++) {
+                            if (riHeaders[ci] === transColForInput || riHeaders[ci] === riColRoute || riHeaders[ci] === riColLoc) continue;
+                            var val = String(row[riHeaders[ci]] || '').trim();
+                            var cleaned = cleanDSP(val);
+                            if (cleaned && cleaned.length >= 2 && cleaned.length <= 10 && !/^[0-9.]+$/.test(cleaned) && !/^A[A-Z0-9]{8,}/.test(val) && !/^(CA|SA)_/.test(val)) { dsp = cleaned; break; }
+                        }
+                    }
+                    var cleanId = tid.replace(/[^A-Z0-9]/gi, '');
+                    if (route || loc || dsp) routeByTransporter[cleanId] = { route: route, loc: loc, dsp: dsp };
+                });
+            }
+        }
+
+        var dspFromAnySheet = {};
+        workbook.SheetNames.forEach(function(sn) {
+            var rows = sheets[sn];
+            if (!rows || rows.length < 2) return;
+            var headers = Object.keys(rows[0]);
+            var dspCol = findHeader(headers, ['dsp', 'company', 'firma', 'shortcode', 'carrier', 'type']);
+            var idCol = null;
+            for (var ci = 0; ci < headers.length; ci++) {
+                var sample = String(rows[0][headers[ci]] || '');
+                if (/^A[A-Z0-9]{10,}/.test(sample)) { idCol = headers[ci]; break; }
+            }
+            var badgeCol = findHeader(headers, ['badge', 'badgeid', 'badge barcode', 'barcode']);
+            if (dspCol && (idCol || badgeCol)) {
+                rows.forEach(function(row) {
+                    var dsp = cleanDSP(row[dspCol]);
+                    if (!dsp) return;
+                    if (idCol) { var tid = String(row[idCol] || '').trim().replace(/[^A-Z0-9]/gi, ''); if (tid) dspFromAnySheet[tid] = dsp; }
+                    if (badgeCol) { var badge = cleanBadge(row[badgeCol]); if (badge) dspFromAnySheet['BADGE:' + badge] = dsp; }
+                });
+            }
+        });
+
+        wellenSheet.forEach(function(row) {
+            var transporter = wColTransporter ? String(row[wColTransporter] || '').trim() : '';
+            var badge = wColBadge ? cleanBadge(row[wColBadge]) : null;
+            var timeRaw = wColTime ? row[wColTime] : null;
+            var timeNum = wColTimeNum ? row[wColTimeNum] : null;
+            var wave = wColWave ? String(row[wColWave] || '').trim() : '';
+            if (!badge && !transporter) { skipped++; return }
+            if (!wave) { skipped++; return }
+            var t = 0;
+            if (timeNum !== null && timeNum !== '') t = parseTime(timeNum);
+            else if (timeRaw !== null) t = parseTime(timeRaw);
+            if (!badge) { skipped++; return }
+            wavesFound.add(wave);
+            var route = '', loc = '', dsp = '';
+            var cleanTid = transporter.replace(/[^A-Z0-9]/gi, '');
+            if (routeByTransporter[cleanTid]) { route = routeByTransporter[cleanTid].route; loc = routeByTransporter[cleanTid].loc; dsp = routeByTransporter[cleanTid].dsp; }
+            if (!route && cleanTid.length >= 8) {
+                var rtKeys = Object.keys(routeByTransporter);
+                for (var rk = 0; rk < rtKeys.length; rk++) {
+                    if (rtKeys[rk].startsWith(cleanTid.substring(0, 10)) || cleanTid.startsWith(rtKeys[rk].substring(0, 10))) {
+                        route = routeByTransporter[rtKeys[rk]].route || route; loc = routeByTransporter[rtKeys[rk]].loc || loc; dsp = routeByTransporter[rtKeys[rk]].dsp || dsp; break;
+                    }
+                }
+            }
+                    // ★ ALWAYS try transporterLookup — it has the real DSP from Transporter sheet
+            if (!dsp || /^\d/.test(dsp) || dsp === 'Not Ready' || dsp === 'Ready') {
+                dsp = '';
+                if (transporterLookup[transporter]) dsp = transporterLookup[transporter].dsp;
+                else if (transporterLookup[cleanTid]) dsp = transporterLookup[cleanTid].dsp;
+                // Also try partial match
+                if (!dsp && cleanTid.length >= 8) {
+                    var tlKeys = Object.keys(transporterLookup);
+                    for (var tli = 0; tli < tlKeys.length; tli++) {
+                        var tlClean = tlKeys[tli].replace(/[^A-Z0-9]/gi, '');
+                        if (tlClean === cleanTid || tlClean.startsWith(cleanTid.substring(0, 10)) || cleanTid.startsWith(tlClean.substring(0, 10))) {
+                            dsp = transporterLookup[tlKeys[tli]].dsp;
+                            if (dsp) break; 
+                        }
+                    }
+                }
+            }
+                       // ★ Try all DSP sources
+            if (!dsp && dspFromAnySheet[cleanTid]) dsp = dspFromAnySheet[cleanTid];
+            if (!dsp && badge && dspFromAnySheet['BADGE:' + badge]) dsp = dspFromAnySheet['BADGE:' + badge];
+            if (!dsp && transporter && dspFromAnySheet[transporter]) dsp = dspFromAnySheet[transporter];
+            if (!dsp) {
+                for (var whi = 0; whi < wHeaders.length; whi++) {
+                    if (wHeaders[whi] === wColTransporter || wHeaders[whi] === wColBadge || wHeaders[whi] === wColTime || wHeaders[whi] === wColTimeNum || wHeaders[whi] === wColWave) continue;
+                    var cellVal = String(row[wHeaders[whi]] || '').trim();
+                    if (cellVal && cellVal.length >= 2 && cellVal.length <= 30) {
+                        var tryDsp = cleanDSP(cellVal);
+                        if (tryDsp && tryDsp.length >= 2 && tryDsp.length <= 8 && !/^[0-9.:]+$/.test(tryDsp) && !/^A[A-Z0-9]{8,}/.test(cellVal)) { dsp = tryDsp; break; }
+                    }
+                }
+            }
+            result[badge] = { id: transporter, wave: wave, t: t, route: route, loc: loc, dsp: dsp };
+            valid++;
+        });
+    }
+
+    // Strategy B
+    if (valid === 0 && inputSheet && inputSheet.length > 0) {
+        var fbHeaders = Object.keys(inputSheet[0]);
+        var fbColRoute = findHeader(fbHeaders, ['route']);
+        var fbColTime = findHeader(fbHeaders, ['dispatch time', 'time']);
+        var fbColLoc = findHeader(fbHeaders, ['location', 'loc', 'staging']);
+        var fbColType = findHeader(fbHeaders, ['type', 'dsp']);
+        var fbColTrans = null;
+        for (var fhi = 0; fhi < fbHeaders.length; fhi++) {
+            var fsamples = inputSheet.slice(0, 10).map(function(r) { return String(r[fbHeaders[fhi]] || '') });
+            if (fsamples.filter(function(v) { return /^A[A-Z0-9]{8,}/.test(v) }).length >= 3) { fbColTrans = fbHeaders[fhi]; break }
+        }
+        if (fbColTrans && transporterSheet) {
+            var fbTHeaders = Object.keys(transporterSheet[0]);
+            var fbTColId = fbTHeaders[0];
+            var fbTColBadge = findHeader(fbTHeaders, ['badge barcode', 'badge', 'badgeid']);
+            var fbTColSC = findHeader(fbTHeaders, ['executed company shortcode', 'shortcode', 'dsp']);
+            var fbTColCo = findHeader(fbTHeaders, ['executed company name', 'company']);
+            var badgeByTrans = {}, dspByTrans = {};
+            transporterSheet.forEach(function(row) {
+                var tid = String(row[fbTColId] || '').trim();
+                var badge = fbTColBadge ? cleanBadge(row[fbTColBadge]) : null;
+                var sc = fbTColSC ? String(row[fbTColSC] || '').trim() : '';
+                var co = fbTColCo ? String(row[fbTColCo] || '').trim() : '';
+                if (tid && badge) badgeByTrans[tid] = badge;
+                if (tid) dspByTrans[tid] = cleanDSP(sc || co);
+            });
+            inputSheet.forEach(function(row) {
+                var tid = fbColTrans ? String(row[fbColTrans] || '').trim() : '';
+                var route = fbColRoute ? String(row[fbColRoute] || '').trim() : '';
+                var loc = fbColLoc ? String(row[fbColLoc] || '').trim() : '';
+                var dspRaw = fbColType ? String(row[fbColType] || '').trim() : '';
+                var t = fbColTime ? parseTime(row[fbColTime]) : 0;
+                var cleanTid = tid.replace(/[^A-Z0-9]/gi, '');
+                var badge = badgeByTrans[cleanTid];
+                if (!badge && cleanTid.length >= 8) {
+                    var bKeys = Object.keys(badgeByTrans);
+                    for (var bk = 0; bk < bKeys.length; bk++) {
+                        if (bKeys[bk].includes(cleanTid.substring(0, 10)) || cleanTid.includes(bKeys[bk].substring(0, 10))) { badge = badgeByTrans[bKeys[bk]]; break }
+                    }
+                }
+                if (!badge || !route) return;
+                var wave = guessWave(t); wavesFound.add(wave);
+                result[badge] = { id: cleanTid, wave: wave, t: t, route: route, loc: loc, dsp: cleanDSP(dspRaw) || (dspByTrans[cleanTid] || '') };
+                valid++;
+            });
+        }
+    }
+
+    // Strategy C
+    if (valid === 0) {
+        for (var si = 0; si < workbook.SheetNames.length; si++) {
+            var sname = workbook.SheetNames[si];
+            var rows = sheets[sname];
+            if (!rows || rows.length < 3) continue;
+            var headers = Object.keys(rows[0]);
+            var colBadge = null, colWave = null, colTime = null, colRoute = null, colLoc = null, colDsp = null, colId = null;
+            for (var chi = 0; chi < headers.length; chi++) {
+                var low = headers[chi].toLowerCase().replace(/[^a-z0-9]/g, '');
+                if (!colBadge && (low.includes('badge') || low.includes('barcode'))) colBadge = headers[chi];
+                if (!colWave && (low.includes('welle') || low.includes('wave'))) colWave = headers[chi];
+                if (!colTime && (low.includes('time') || low.includes('zeit') || low.includes('dispatch'))) colTime = headers[chi];
+                if (!colRoute && (low.includes('route') || low.includes('tour'))) colRoute = headers[chi];
+                if (!colLoc && (low.includes('location') || low.includes('staging'))) colLoc = headers[chi];
+                if (!colDsp && (low.includes('dsp') || low.includes('type') || low.includes('company'))) colDsp = headers[chi];
+                if (!colId && (low.includes('transporter') || low.includes('login'))) colId = headers[chi];
+            }
+            if (colBadge && colWave) {
+                rows.forEach(function(row) {
+                    var badge = cleanBadge(row[colBadge]);
+                    var wave = colWave ? String(row[colWave] || '').trim() : '';
+                    if (!badge || !wave) return;
+                    wavesFound.add(wave);
+                    result[badge] = { id: colId ? String(row[colId] || '').trim() : '', wave: wave, t: colTime ? parseTime(row[colTime]) : 0, route: colRoute ? String(row[colRoute] || '').trim() : '', loc: colLoc ? String(row[colLoc] || '').trim() : '', dsp: colDsp ? cleanDSP(row[colDsp]) : '' };
+                    valid++;
+                });
+                if (valid > 0) break;
+            }
+        }
+    }
+        // ★ DEBUG: Show DSP source detection
+    console.log('[PARSER] Input Form — transporter column:', transColForInput, '| DSP column:', riColType);
+    console.log('[PARSER] Transporter sheet — ID column:', typeof tColId !== 'undefined' ? tColId : 'N/A', '| Company:', typeof tColCompany !== 'undefined' ? tColCompany : 'N/A', '| Shortcode:', typeof tColShortcode !== 'undefined' ? tColShortcode : 'N/A');
+    console.log('[PARSER] routeByTransporter entries:', Object.keys(routeByTransporter || {}).length);
+    if (routeByTransporter) {
+        var sampleKeys = Object.keys(routeByTransporter).slice(0, 3);
+        sampleKeys.forEach(function(k) { console.log('  Sample:', k, '→', JSON.stringify(routeByTransporter[k])); });
+    }
+    return { data: result, validCount: valid, skippedCount: skipped, wavesFound: wavesFound };
+}
+
+// ============================================================
+// PREVIEW
+// ============================================================
+function showPreview(result) {
+    parsedExcelData = result.data;
+    document.getElementById('previewStats').innerHTML =
+        '<div class="pst"><div class="n" style="color:var(--green)">' + result.validCount + '</div><div class="l">Drivers</div></div>' +
+        '<div class="pst"><div class="n" style="color:var(--accent)">' + result.wavesFound.size + '</div><div class="l">Waves</div></div>' +
+        '<div class="pst"><div class="n" style="color:var(--red)">' + result.skippedCount + '</div><div class="l">Skipped</div></div>' +
+        '<div class="pst"><div class="n" style="color:var(--text3)">' + Object.keys(BADGE_MAP).length + '</div><div class="l">Current</div></div>';
+    var tbody = document.getElementById('previewBody'); tbody.innerHTML = '';
+    var entries = Object.entries(parsedExcelData);
+    var show = Math.min(entries.length, 30);
+    for (var i = 0; i < show; i++) {
+        var badge = entries[i][0], d = entries[i][1];
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + (i + 1) + '</td><td><strong>' + badge + '</strong></td><td style="font-size:10px;max-width:100px;overflow:hidden;text-overflow:ellipsis">' + (d.id || '--') + '</td><td><span style="background:rgba(255,153,0,0.12);padding:2px 7px;border-radius:4px;font-weight:700;font-size:10px;color:var(--accent)">' + d.wave + '</span></td><td>' + timeStr(d.t) + '</td><td>' + (d.route || '--') + '</td><td>' + (d.loc || '--') + '</td><td>' + (d.dsp || '--') + '</td>';
+        tbody.appendChild(tr);
+    }
+    if (entries.length > 30) {
+        var tr2 = document.createElement('tr');
+        tr2.innerHTML = '<td colspan="8" style="text-align:center;color:var(--text3);font-style:italic">… and ' + (entries.length - 30) + ' more</td>';
+        tbody.appendChild(tr2);
+    }
+    document.getElementById('previewSection').classList.add('show');
+    document.getElementById('applyBtn').disabled = false;
+}
+
+// ============================================================
+// FILE HANDLING
+// ============================================================
+function handleDrop(e) { var f = e.dataTransfer.files[0]; if (f) processFile(f) }
+function handleFileSelect(e) { var f = e.target.files[0]; if (f) processFile(f) }
+
+function processFile(file) {
+    var ext = file.name.split('.').pop().toLowerCase();
+    if (['xlsx', 'xls', 'csv'].indexOf(ext) === -1) { showToast('❌ Use .xlsx, .xls, or .csv', 'error'); return }
+    document.getElementById('dropIcon').textContent = '⏳';
+    document.getElementById('dropTitle').textContent = file.name;
+    document.getElementById('dropSub').textContent = 'Reading all sheets…';
+    document.getElementById('dropZone').classList.add('hf');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            var data = new Uint8Array(e.target.result);
+            var wb = XLSX.read(data, { type: 'array', cellDates: true });
+            var result = parseWorkbook(wb);
+            console.log('=== PARSE RESULTS ===');
+            console.log('Valid:', result.validCount, 'Skipped:', result.skippedCount);
+            console.log('Waves:', Array.from(result.wavesFound));
+            var dspCounts = {};
+            Object.values(result.data).forEach(function(d) { var key = d.dsp || '(EMPTY)'; dspCounts[key] = (dspCounts[key] || 0) + 1; });
+            console.log('DSP breakdown:', dspCounts);
+            if (result.validCount > 0) {
+                document.getElementById('dropIcon').textContent = '✅';
+                document.getElementById('dropSub').textContent = file.name + ' — ' + result.validCount + ' drivers';
+                var info = '<strong>✅ ' + result.validCount + ' drivers in ' + result.wavesFound.size + ' waves</strong><br>';
+                info += '<small>Sheets: ' + wb.SheetNames.join(', ') + '</small>';
+                if (result.skippedCount > 0) info += '<br><small>Skipped ' + result.skippedCount + ' rows</small>';
+                var withRoute = Object.values(result.data).filter(function(d) { return d.route }).length;
+                var withLoc = Object.values(result.data).filter(function(d) { return d.loc }).length;
+                var withDsp = Object.values(result.data).filter(function(d) { return d.dsp }).length;
+                var dspPercent = result.validCount > 0 ? Math.round((withDsp / result.validCount) * 100) : 0;
+                var dspColor = dspPercent >= 90 ? 'var(--green)' : dspPercent >= 50 ? 'var(--accent)' : 'var(--red)';
+                info += '<br><small>Routes: ' + withRoute + ' · Locations: ' + withLoc + ' · DSP: <strong style="color:' + dspColor + '">' + withDsp + '/' + result.validCount + ' (' + dspPercent + '%)</strong></small>';
+                if (dspPercent < 90) info += '<br><small style="color:var(--accent)">⚠️ Some DSP data missing.</small>';
+                showSt(info, 'ok');
+                showPreview(result);
+            } else {
+                document.getElementById('dropIcon').textContent = '❌';
+                document.getElementById('dropSub').textContent = 'Could not read data';
+                showSt('❌ No valid data found.<br><small>Sheets: ' + wb.SheetNames.join(', ') + '</small>', 'err');
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('❌ Error: ' + err.message, 'error');
+            document.getElementById('dropIcon').textContent = '❌';
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// ============================================================
+// APPLY DATA
+// ============================================================
+function applyData() {
+    if (!parsedExcelData || Object.keys(parsedExcelData).length === 0) { showToast('❌ No data!', 'error'); return; }
+// ★ Preserve DSP from existing data if new upload doesn't have it
+var oldMap = JSON.parse(JSON.stringify(BADGE_MAP));
+BADGE_MAP = JSON.parse(JSON.stringify(parsedExcelData));
+Object.keys(BADGE_MAP).forEach(function(badge) {
+    if (!BADGE_MAP[badge].dsp && oldMap[badge] && oldMap[badge].dsp) {
+        BADGE_MAP[badge].dsp = oldMap[badge].dsp;
+        console.log('[DSP-PRESERVE] Kept DSP for badge ' + badge + ': ' + oldMap[badge].dsp);
+    }
+});
+    resetScanData();
+    var today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+    localStorage.setItem('dnw1_data_date', today);
+    var btn = document.getElementById('applyBtn');
+    btn.textContent = '⏳ Uploading to cloud...';
+    btn.disabled = true;
+        saveToCloud(BADGE_MAP).then(function(ok) {
+        localStorage.setItem('dnw1_data_version', String(Date.now()));
+        saveUploadTime();
+        updateUploadTimeDisplay();
+        document.getElementById('dataBadge').textContent = '☁️ ' + today;
+        document.getElementById('dataBadge').className = 'dbadge on';
+        rebuildWaves(); updateStats(); renderWaveList(); renderWaveProgress(); closeUpload();
+        if (ok) showToast('☁️ ' + Object.keys(BADGE_MAP).length + ' drivers synced!', 'success');
+        else showToast('⚠️ Saved locally. Cloud sync failed.', 'error');
+        btn.textContent = '✅ Apply & Sync to All Devices';
+    });
+}
+
+// ============================================================
+// RESET
+// ============================================================
+function clearSavedData() {
+    if (!confirm('Reset data for ALL devices?')) return;
+    localStorage.removeItem('dnw1_badge_data');
+    localStorage.removeItem('dnw1_data_date');
+    localStorage.removeItem('dnw1_data_version');
+        localStorage.removeItem(UPLOAD_TIME_KEY);
+    localStorage.removeItem(UPLOAD_DEVICE_KEY);
+    localStorage.removeItem(UPLOAD_DEVICE_NAME_KEY);
+    BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP));
+    lastCloudHash = '';
+    lastScanHash = '';
+    scannedBadges = {};
+    scanLog = [];
+    scanCount = 0;
+    offlineQueue = [];
+    saveOfflineQueue();
+    updateQueueUI();
+    writeCloudRaw({ badges: {}, version: Date.now(), uploadedAt: new Date().toISOString(), count: 0, scans: { date: '', scannedBadges: {}, log: [], devices: {} } }).catch(function() {});
+    rebuildWaves(); updateStats(); renderWaveList(); renderWaveProgress(); renderLog();
+    document.getElementById('dataBadge').textContent = 'Default Data';
+    document.getElementById('dataBadge').className = 'dbadge';
+    closeUpload();
+    showToast('🔄 Reset for all devices', 'success');
+        updateUploadTimeDisplay();
+}
+
+// ============================================================
+// TEMPLATE + REPORT
+// ============================================================
+function downloadTemplate() {
+    var rows = [['badge', 'transporterId', 'wave', 'time', 'route', 'location', 'dsp']];
+    Object.entries(BADGE_MAP).forEach(function(e) { var b = e[0], d = e[1]; rows.push([b, d.id || '', d.wave || '', d.t ? timeStr(d.t) : '', d.route || '', d.loc || '', d.dsp || '']) });
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{ wch: 12 }, { wch: 22 }, { wch: 12 }, { wch: 8 }, { wch: 12 }, { wch: 14 }, { wch: 8 }];
+    var wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Data');
+    XLSX.writeFile(wb, 'DNW1_Template_' + new Date().toISOString().split('T')[0] + '.xlsx');
+    showToast('📥 Template downloaded', 'success');
+}
+
+function exportDailyReport() {
+    var today = new Date().toISOString().split('T')[0];
+    var rows = [['DNW1 Daily Scan Report — ' + today], [''],
+        ['Badge', 'Transporter', 'Wave', 'Time', 'Route', 'Location', 'DSP', 'Direction', 'Scanned', 'Scan Time', 'Scanned By']];
+    Object.entries(BADGE_MAP).forEach(function(e) {
+        var badge = e[0], d = e[1];
+        var wasScanned = scannedBadges[badge] ? 'YES' : 'NO';
+        var dir = getDirection(d.wave);
+        var scanTime = '', scannedBy = '';
+        for (var i = 0; i < scanLog.length; i++) {
+            if (scanLog[i].badge === badge && scanLog[i].found) { scanTime = scanLog[i].time; scannedBy = scanLog[i].deviceName || scanLog[i].device || ''; break; }
+        }
+        rows.push([badge, d.id || '', d.wave || '', timeStr(d.t), d.route || '', d.loc || '', d.dsp || '', dir.dir ? dir.dir.toUpperCase() : '', wasScanned, scanTime, scannedBy]);
+    });
+    rows.push([''], ['SUMMARY']);
+    rows.push(['Total Drivers', Object.keys(BADGE_MAP).length]);
+    rows.push(['Total Scanned', Object.keys(scannedBadges).length]);
+    rows.push(['Total Waves', WAVES.length]);
+    rows.push(['Offline Queue', offlineQueue.length]);
+    rows.push(['Report Time', nowStr()]);
+    rows.push(['Device', DEVICE_NAME + ' (' + DEVICE_ID + ')']);
+    var ws = XLSX.utils.aoa_to_sheet(rows);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Report');
+    XLSX.writeFile(wb, 'DNW1_Report_' + today + '.xlsx');
+    showToast('📋 Report downloaded!', 'success');
+}
+
+// ============================================================
+// UPLOAD UI
+// ============================================================
+function openUpload() { document.getElementById('uploadPanel').classList.add('show'); resetUploadUI() }
+function closeUpload() { document.getElementById('uploadPanel').classList.remove('show'); setTimeout(function() { scanInput.focus() }, 200) }
+function resetUploadUI() {
+    document.getElementById('dropIcon').textContent = '📁';
+    document.getElementById('dropTitle').textContent = 'Drop your file here or click to browse';
+    document.getElementById('dropSub').textContent = 'Supports .xlsx, .xls, .csv';
+    document.getElementById('dropZone').classList.remove('hf');
+    document.getElementById('previewSection').classList.remove('show');
+    document.getElementById('rdst').style.display = 'none';
+    document.getElementById('applyBtn').disabled = true;
+    document.getElementById('applyBtn').textContent = '✅ Apply & Sync to All Devices';
+    document.getElementById('excelFile').value = '';
+    parsedExcelData = null;
+}
+
+// ============================================================
+// WAVES / STATS / CLOCK
+// ============================================================
+function rebuildWaves() {
+    var EARLY_MINUTES = 10; // ★ Show waves 10 min earlier than Excel
+    var earlyOffset = EARLY_MINUTES / (24 * 60); // Convert to decimal day
+
+    var m = {}; 
+    Object.values(BADGE_MAP).forEach(function(d) { 
+        if (d.wave && !m[d.wave]) m[d.wave] = d.t || 0;
+    });
+    WAVES = Object.entries(m).map(function(e) { 
+        var adjustedTime = Math.max(0, e[1] - earlyOffset);
+        return { name: e[0], t: adjustedTime, display: timeStr(adjustedTime), originalTime: e[1] }; 
+    }).sort(function(a, b) { return a.t - b.t });
+}
+
+function sanitizeLoadedDSP() {
+    Object.keys(BADGE_MAP).forEach(function(badge) {
+        var d = BADGE_MAP[badge];
+        if (d.dsp) {
+            var cleaned = cleanDSP(d.dsp);
+            if (cleaned !== d.dsp) {
+                d.dsp = cleaned;
+            }
+        }
+    });
+}
+function waveCount(n) { return Object.values(BADGE_MAP).filter(function(d) { return d.wave === n }).length }
+function curWave() {
+    var now = nowDec();
+    if (WAVES.length === 0) return null;
+    if (now >= WAVES[WAVES.length - 1].t) return 'finished';
+    var c = null;
+    for (var i = WAVES.length - 1; i >= 0; i--) { if (now >= WAVES[i].t) { c = WAVES[i]; break; } }
+    return c;
+}
+function updateClock() { document.getElementById('clock').textContent = nowStr() }
+setInterval(updateClock, 1000); updateClock();
+
+function updateStats() {
+    var totalBadges = Object.keys(BADGE_MAP).length;
+    var totalScanned = Object.keys(scannedBadges).length;
+    
+    document.getElementById('stTotal').textContent = totalBadges;
+    document.getElementById('stScanned').textContent = totalScanned;
+    document.getElementById('stWaves').textContent = WAVES.length;
+    
+    var c = curWave();
+    if (c === 'finished') { document.getElementById('stNext').textContent = '✅ Done'; document.getElementById('stNext').style.fontSize = '18px'; }
+    else if (c) { document.getElementById('stNext').textContent = c.name.replace('Welle', 'W'); document.getElementById('stNext').style.fontSize = ''; }
+    else { document.getElementById('stNext').textContent = '--'; document.getElementById('stNext').style.fontSize = ''; }
+}
+setInterval(updateStats, 30000);
+
+function renderWaveList() {
+    var list = document.getElementById('waveList'); var c = curWave(); list.innerHTML = '';
+    if (WAVES.length === 0) { list.innerHTML = '<div class="em">No waves</div>'; return }
+    WAVES.forEach(function(w) {
+        var cnt = waveCount(w.name); var isCur = c && c !== 'finished' && c.name === w.name;
+        var dir = getDirection(w.name);
+        var dirHtml = dir.dir ? '<span class="wdir ' + dir.dir + '">' + (dir.dir === 'links' ? '⬅️ L' : '➡️ R') + '</span>' : '';
+        var div = document.createElement('div'); div.className = 'wr' + (isCur ? ' act' : '');
+        div.innerHTML = '<div style="display:flex;align-items:center"><span class="wn">' + w.name + '</span>' + (isCur ? '<span class="wnow">NOW</span>' : '') + dirHtml + '</div><span class="wt">' + w.display + '</span><span class="wc">' + cnt + '</span>';
+        div.onclick = function() { openWaveModal(w.name) }; list.appendChild(div);
+    });
+}
+setInterval(renderWaveList, 60000);
+
+function openWaveModal(waveName) {
+    var drivers = Object.entries(BADGE_MAP).filter(function(e) { return e[1].wave === waveName });
+    var dir = getDirection(waveName);
+    document.getElementById('modalTitle').textContent = waveName + ' — ' + drivers.length + ' Drivers' + (dir.dir ? ' — ' + dir.text : '');
+    var body = document.getElementById('modalBody'); body.innerHTML = '';
+    drivers.forEach(function(e, i) {
+        var badge = e[0], d = e[1];
+        var scanInfo = scannedBadges[badge];
+        var isScanned = !!scanInfo;
+        var scannedClass = isScanned ? ' style="background:rgba(0,196,140,0.06)"' : '';
+        
+        var scannedByText = '';
+        if (isScanned) {
+            if (typeof scanInfo === 'object' && scanInfo.deviceName) {
+                var myNameLower = (DEVICE_NAME || '').toLowerCase().trim();
+                var isMe = scanInfo.deviceName.toLowerCase().trim() === myNameLower || scanInfo.device === DEVICE_ID;
+                scannedByText = ' ✅ <span style="font-size:9px;padding:1px 5px;border-radius:3px;font-weight:700;' + 
+                    (isMe ? 'background:rgba(168,85,247,0.15);color:#c084fc">' + scanInfo.deviceName + ' (Du)' : 
+                    'background:rgba(59,130,246,0.15);color:#60a5fa">' + scanInfo.deviceName) + '</span>';
+            } else {
+                scannedByText = ' ✅';
+            }
+        }
+        
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td' + scannedClass + '>' + (i + 1) + scannedByText + '</td><td' + scannedClass + '><strong>' + badge + '</strong></td><td' + scannedClass + ' style="font-size:10px">' + (d.id || '--') + '</td><td' + scannedClass + '>' + (d.route || '--') + '</td><td' + scannedClass + '>' + (d.loc || '--') + '</td><td' + scannedClass + '>' + (d.dsp || '--') + '</td><td' + scannedClass + '>' + (dir.dir ? '<span class="wdir ' + dir.dir + '">' + dir.symbol + '</span>' : '--') + '</td>';
+        body.appendChild(tr);
+    });
+    document.getElementById('overlay').classList.add('show');
+}
+function updateCountdown() { }
+
+// ============================================================
+// WAVE PROGRESS BARS
+// ============================================================
+function renderWaveProgress() {
+    var container = document.getElementById('waveProgressBars');
+    if (!container) return;
+    container.innerHTML = '';
+
+    WAVES.forEach(function(w) {
+        var total = waveCount(w.name);
+        var scanned = 0;
+        var scannerCounts = {}; // { "Ali": 3, "Berkay": 2 }
+
+        Object.entries(BADGE_MAP).forEach(function(e) {
+            if (e[1].wave === w.name && scannedBadges[e[0]]) {
+                scanned++;
+                var info = scannedBadges[e[0]];
+                var scannerName = 'Unknown';
+                if (typeof info === 'object' && info.deviceName) {
+                    scannerName = info.deviceName;
+                } else if (info === true) {
+                    scannerName = DEVICE_NAME || 'Du';
+                }
+                // Normalize name for grouping
+                var nameKey = scannerName.toLowerCase().trim();
+                if (!scannerCounts[nameKey]) scannerCounts[nameKey] = { name: scannerName, count: 0 };
+                scannerCounts[nameKey].count++;
+            }
+        });
+
+        var pct = total > 0 ? Math.round((scanned / total) * 100) : 0;
+        var fillClass = pct === 100 ? 'full' : pct >= 70 ? 'high' : pct >= 30 ? 'mid' : 'low';
+        var dir = getDirection(w.name);
+        var dirHtml = dir.dir ? '<span class="wpb-dir ' + dir.dir + '">' + (dir.dir === 'links' ? '⬅️ L' : '➡️ R') + '</span>' : '';
+
+        // Build per-scanner breakdown
+        var breakdownHtml = '';
+        var scannerEntries = Object.values(scannerCounts).sort(function(a, b) { return b.count - a.count; });
+        if (scannerEntries.length > 0) {
+            var parts = scannerEntries.map(function(s) {
+                var myNameLower = (DEVICE_NAME || '').toLowerCase().trim();
+                var isMe = s.name.toLowerCase().trim() === myNameLower;
+                var color = isMe ? '#c084fc' : '#60a5fa';
+                var label = isMe ? s.name + ' (Du)' : s.name;
+                return '<span style="color:' + color + ';font-weight:700">' + label + '</span>: ' + s.count;
+            });
+            breakdownHtml = '<div style="font-size:10px;color:var(--text3);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap">' + parts.join(' · ') + '</div>';
+        }
+
+        var div = document.createElement('div');
+        div.className = 'wpb';
+        div.innerHTML =
+            '<div class="wpb-header">' +
+                '<div style="display:flex;align-items:center;gap:10px">' +
+                    '<span class="wpb-name">' + w.name + '</span>' +
+                    '<span class="wpb-time">' + w.display + '</span>' +
+                    dirHtml +
+                '</div>' +
+                '<span class="wpb-count"><strong>' + scanned + '</strong> / ' + total + ' scanned</span>' +
+            '</div>' +
+            '<div class="wpb-track">' +
+                '<div class="wpb-fill ' + fillClass + '" style="width:' + Math.max(pct, 3) + '%">' + pct + '%</div>' +
+            '</div>' +
+            breakdownHtml;
+        container.appendChild(div);
+    });
+}
+setInterval(renderWaveProgress, 3000);
+
+// ============================================================
+// SEARCH
+// ============================================================
+function searchDrivers(query) {
+    var container = document.getElementById('searchResults');
+    var q = query.trim().toLowerCase();
+    if (q.length < 2) { container.style.display = 'none'; return; }
+    container.style.display = 'block'; container.innerHTML = '';
+    var results = [];
+    Object.entries(BADGE_MAP).forEach(function(e) {
+        var badge = e[0], d = e[1];
+        var searchStr = (badge + ' ' + (d.id || '') + ' ' + (d.route || '') + ' ' + (d.wave || '') + ' ' + (d.loc || '') + ' ' + (d.dsp || '')).toLowerCase();
+        if (searchStr.includes(q)) results.push({ badge: badge, data: d });
+    });
+    if (results.length === 0) { container.innerHTML = '<div class="sr-count">No results for "' + query + '"</div>'; return; }
+    container.innerHTML = '<div class="sr-count">' + results.length + ' results</div>';
+    results.slice(0, 20).forEach(function(r) {
+        var dir = getDirection(r.data.wave);
+        var dirHtml = dir.dir ? '<span class="sr-dir ' + dir.dir + '">' + (dir.dir === 'links' ? '⬅️' : '➡️') + '</span>' : '';
+        var scannedIcon = scannedBadges[r.badge] ? ' ✅' : '';
+        var div = document.createElement('div');
+        div.className = 'sr-row';
+        div.innerHTML = '<span class="sr-badge">' + r.badge + scannedIcon + '</span><span class="sr-route">' + (r.data.route || '--') + '</span><span class="sr-loc">' + (r.data.loc || '--') + '</span><span class="sr-dsp">' + (r.data.dsp || '--') + '</span>' + dirHtml + '<span class="sr-wave">' + r.data.wave + '</span>';
+        div.onclick = function() {
+            document.getElementById('scanInput').value = r.badge;
+            processScan(r.badge);
+            container.style.display = 'none';
+            document.getElementById('searchInput').value = '';
+        };
+        container.appendChild(div);
+    });
+    if (results.length > 20) container.innerHTML += '<div class="sr-count">... and ' + (results.length - 20) + ' more</div>';
+}
+
+// ============================================================
+// SCANNER — WITH OFFLINE QUEUE INTEGRATION
+// ============================================================
+var scanInput = document.getElementById('scanInput');
+var scanTimeout = null;
+
+scanInput.addEventListener('input', function() {
+    if (isAnyModalOpen()) return;
+    clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(function() { var v = scanInput.value.trim(); if (v.length >= 3) processScan(v) }, 300);
+});
+scanInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); clearTimeout(scanTimeout); var v = scanInput.value.trim(); if (v.length >= 3) processScan(v) }
+    if (e.key === 'Escape') { document.getElementById('result').className = 'res'; document.getElementById('dirResult').className = 'dir-result'; hideDirectionBanner(); scanInput.value = '' }
+});
+
+function processScan(badgeStr) {
+    var b1 = badgeStr.trim(), b2 = b1.replace(/^0+/, '') || b1, b3 = b1.replace(/\.0$/, '');
+    var driver = BADGE_MAP[b1] || BADGE_MAP[b2] || BADGE_MAP[b3];
+    var badge = driver ? (BADGE_MAP[b1] ? b1 : BADGE_MAP[b2] ? b2 : b3) : b2;
+    var resEl = document.getElementById('result');
+    var scanTime = nowStr();
+
+    if (driver) {
+        var direction = getDirection(driver.wave);
+        document.getElementById('resWave').textContent = formatWave(driver.wave) || 'No Wave';
+        document.getElementById('resTime').textContent = timeStr(driver.t);
+        document.getElementById('resBadge').textContent = badge;
+        document.getElementById('resTrans').textContent = driver.id || '--';
+        document.getElementById('resRoute').textContent = driver.route || '--';
+        document.getElementById('resLoc').textContent = driver.loc || '--';
+        var displayDsp = driver.dsp || '';
+if (/^A[A-Za-z0-9]{8,}$/.test(displayDsp) || (/[0-9]/.test(displayDsp) && displayDsp.length > 6 && /[A-Za-z]/.test(displayDsp))) displayDsp = '';
+document.getElementById('resDSP').textContent = displayDsp || '--';
+        if (direction.dir) document.getElementById('resStatus').innerHTML = direction.symbol + ' ' + direction.dir.toUpperCase();
+        else document.getElementById('resStatus').textContent = 'Assigned ✓';
+        document.getElementById('resTop').className = 'rh ok';
+        showDirectionResult(driver, direction);
+                var scanInfo = trackScan(badge);
+        showDupWarning(badge, scanInfo, driver);
+        showDirectionBanner(driver, direction);
+        addLog(badge, driver.wave, true, direction);
+        playSound('ok');
+        announceDriver(driver, true);
+       if (!scannedBadges[badge]) {
+    scannedBadges[badge] = { device: DEVICE_ID, deviceName: DEVICE_NAME, time: nowStr() };
+}
+saveScanData();
+
+        // ★ OFFLINE QUEUE: Always enqueue, then try cloud sync
+        enqueueScan(badge, driver.wave, true, direction, scanTime);
+        if (navigator.onLine) {
+            syncScansToCloud();
+            // If sync succeeds, queue entry will be cleared
+        }
+
+        renderWaveProgress();
+    } else {
+        document.getElementById('resWave').textContent = 'NOT FOUND';
+        document.getElementById('resTime').textContent = '⚠️';
+        document.getElementById('resBadge').textContent = badge;
+        document.getElementById('resTrans').textContent = '--';
+        document.getElementById('resRoute').textContent = '--';
+        document.getElementById('resLoc').textContent = '--';
+        document.getElementById('resDSP').textContent = '--';
+        document.getElementById('resStatus').textContent = 'Unknown Badge';
+        document.getElementById('resTop').className = 'rh fail';
+        document.getElementById('dirResult').className = 'dir-result';
+        hideDirectionBanner();
+        addLog(badge, 'NOT FOUND', false, null);
+                trackScan(badge);
+        hideDupWarning();
+        playSound('no');
+        announceDriver(null, false);
+
+        // Also queue "not found" scans for logging
+        enqueueScan(badge, 'NOT FOUND', false, null, scanTime);
+        if (navigator.onLine) syncScansToCloud();
+    }
+
+    resEl.className = 'res show';
+    scanCount++;
+    updateStats();
+    setTimeout(function() { scanInput.value = ''; scanInput.focus() }, 100);
+}
+
+// ============================================================
+// SCAN LOG
+// ============================================================
+function addLog(badge, wave, found, direction) {
+    scanLog.unshift({ badge: badge, wave: wave, found: found, time: nowStr(), dir: direction, device: DEVICE_ID, deviceName: DEVICE_NAME });
+    if (scanLog.length > 100) scanLog.pop();
+    renderLog();
+    saveScanData();
+}
+function renderLog() {
+    var list = document.getElementById('logList');
+    if (scanLog.length === 0) { list.innerHTML = '<div class="em">Noch keine Scans</div>'; return }
+    list.innerHTML = '';
+    scanLog.forEach(function(e) {
+        var dirHtml = '';
+        if (e.dir && e.dir.dir) dirHtml = '<span class="log-dir ' + e.dir.dir + '">' + (e.dir.dir === 'links' ? '⬅️' : '➡️') + '</span>';
+        var deviceTag = '';
+        var scannerName = e.deviceName || e.device || '';
+        var myNameLower = (DEVICE_NAME || '').toLowerCase().trim();
+        var theirNameLower = (scannerName || '').toLowerCase().trim();
+        if (scannerName) {
+            var isMe = (e.device === DEVICE_ID) || (myNameLower && theirNameLower === myNameLower);
+            if (isMe) deviceTag = '<span style="font-size:8px;background:rgba(168,85,247,0.15);color:#c084fc;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:3px">Du</span>';
+            else deviceTag = '<span style="font-size:8px;background:rgba(59,130,246,0.15);color:#60a5fa;padding:1px 5px;border-radius:3px;font-weight:700;margin-left:3px">' + scannerName + '</span>';
+        }
+        var div = document.createElement('div'); div.className = 'lr';
+        div.innerHTML = '<span class="lb">' + e.badge + deviceTag + '</span>' + dirHtml + '<span class="lt ' + (e.found ? 'ok' : 'no') + '">' + e.wave + '</span><span class="ltm">' + e.time + '</span>';
+        list.appendChild(div);
+    });
+}
+function clearLog() {
+    if (!confirm('Clear scans on THIS device? (Cloud scans stay)')) return;
+    scanLog = []; scanCount = 0; scannedBadges = {};
+    updateStats(); renderLog(); renderWaveProgress(); saveScanData();
+        scanCounts = {};
+    saveScanCounts();
+}
+
+// ============================================================
+// SOUND
+// ============================================================
+function playSound(type) {
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var gain = ctx.createGain();
+        gain.connect(ctx.destination);
+
+        if (type === 'ok') {
+            // ★ LOUD success sound — triple beep
+            gain.gain.value = 0.5;
+
+            var osc1 = ctx.createOscillator();
+            osc1.connect(gain);
+            osc1.frequency.value = 880;
+            osc1.start(ctx.currentTime);
+            osc1.stop(ctx.currentTime + 0.1);
+
+            var osc2 = ctx.createOscillator();
+            var gain2 = ctx.createGain();
+            gain2.gain.value = 0.5;
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.frequency.value = 1100;
+            osc2.start(ctx.currentTime + 0.12);
+            osc2.stop(ctx.currentTime + 0.22);
+
+            var osc3 = ctx.createOscillator();
+            var gain3 = ctx.createGain();
+            gain3.gain.value = 0.5;
+            osc3.connect(gain3);
+            gain3.connect(ctx.destination);
+            osc3.frequency.value = 1400;
+            osc3.start(ctx.currentTime + 0.24);
+            osc3.stop(ctx.currentTime + 0.4);
+
+            setTimeout(function() { ctx.close(); }, 500);
+        } else {
+            // ★ LOUD error sound — low warning buzz
+            gain.gain.value = 0.6;
+
+            var osc = ctx.createOscillator();
+            osc.type = 'square';
+            osc.connect(gain);
+            osc.frequency.value = 200;
+            osc.start(ctx.currentTime);
+            osc.frequency.setValueAtTime(150, ctx.currentTime + 0.2);
+            osc.stop(ctx.currentTime + 0.5);
+
+            var osc2b = ctx.createOscillator();
+            var gain2b = ctx.createGain();
+            gain2b.gain.value = 0.6;
+            osc2b.type = 'square';
+            osc2b.connect(gain2b);
+            gain2b.connect(ctx.destination);
+            osc2b.frequency.value = 150;
+            osc2b.start(ctx.currentTime + 0.55);
+            osc2b.stop(ctx.currentTime + 1.0);
+
+            setTimeout(function() { ctx.close(); }, 1100);
+        }
+    } catch (e) {}
+}
+// ============================================================
+// WEATHER
+// ============================================================
+function loadWeather() {
+    var lat = 52.43, lon = 9.43;
+    fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon + '&current_weather=true')
+        .then(function(r) { return r.json() })
+        .then(function(data) {
+            var w = data.current_weather;
+            var temp = Math.round(w.temperature);
+            var code = w.weathercode;
+            var icon = '☀️';
+            if (code >= 1 && code <= 3) icon = '⛅';
+            if (code >= 45 && code <= 48) icon = '🌫️';
+            if (code >= 51 && code <= 67) icon = '🌧️';
+            if (code >= 71 && code <= 77) icon = '❄️';
+            if (code >= 80 && code <= 82) icon = '🌦️';
+            if (code >= 95) icon = '⛈️';
+            document.getElementById('weatherIcon').textContent = icon;
+            document.getElementById('weatherTemp').textContent = temp + '°C';
+            document.getElementById('weather').title = 'Wind: ' + w.windspeed + ' km/h';
+        })
+        .catch(function() {
+            document.getElementById('weatherIcon').textContent = '🌡️';
+            document.getElementById('weatherTemp').textContent = '--°';
+        });
+}
+loadWeather();
+setInterval(loadWeather, 600000);
+
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+if ('Notification' in window) { Notification.requestPermission(); }
+function sendNotification(title, body) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: body, icon: 'icon-192.png', tag: 'dnw1-' + Date.now() });
+    }
+}
+function checkWaveAlerts() {
+    var now = nowDec();
+    WAVES.forEach(function(w) {
+        var diff = w.t - now;
+        var mins = diff * 24 * 60;
+        if (mins > 4.8 && mins < 5.2) {
+            var dir = getDirection(w.name);
+          sendNotification('⏰ ' + w.name + ' in 5 Minuten!', waveCount(w.name) + ' Fahrer • ' + w.display + (dir.dir ? ' • Fahr nach ' + dir.dir : ''));
+        }
+        if (mins > -0.2 && mins < 0.2) {
+            var dir2 = getDirection(w.name);
+           sendNotification('🚀 ' + w.name + ' — JETZT DISPATCH!', waveCount(w.name) + ' Fahrer' + (dir2.dir ? ' • Fahr nach ' + dir2.dir : ''));
+           
+        }
+    });
+}
+setInterval(checkWaveAlerts, 30000);
+
+// ============================================================
+// AUTO-FOCUS
+// ============================================================
+function isAnyModalOpen() {
+    return document.getElementById('fsOverlay').classList.contains('show') ||
+           document.getElementById('overlay').classList.contains('show') ||
+           document.getElementById('uploadPanel').classList.contains('show') ||
+           document.getElementById('pwOverlay').classList.contains('show') ||
+           document.getElementById('setupOverlay').classList.contains('show') ||
+           document.getElementById('nameOverlay').classList.contains('show');
+}
+document.addEventListener('click', function(e) {
+    if (isAnyModalOpen()) return;
+    if (e.target.id === 'searchInput' || e.target.closest('#searchResults')) return;
+    setTimeout(function() { scanInput.focus() }, 100);
+});
+
+// ============================================================
+// INIT — LOAD DATA + OFFLINE QUEUE
+// ============================================================
+function loadData() {
+    var theme = localStorage.getItem('dnw1_theme');
+    if (theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+    }
+    var voiceSetting = localStorage.getItem('dnw1_voice');
+    if (voiceSetting === 'off') {
+        voiceEnabled = false;
+        document.getElementById('voiceBtn').textContent = '🔇';
+        document.getElementById('voiceBtn').className = 'icon-btn';
+    }
+
+    // Setup screen
+    updateUserBadge();
+    if (needsSetup()) {
+        setTimeout(function() { showSetupScreen(); }, 200);
+    } else {
+        setTimeout(function() { scanInput.focus(); }, 200);
+    }
+
+    // Load local badge data first
+    var saved = localStorage.getItem('dnw1_badge_data');
+    if (saved) {
+        try { BADGE_MAP = JSON.parse(saved) }
+        catch (e) { BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP)) }
+    } else {
+        BADGE_MAP = JSON.parse(JSON.stringify(DEFAULT_BADGE_MAP));
+    }
+    lastCloudHash = simpleHash(JSON.stringify(BADGE_MAP));
+    rebuildWaves(); sanitizeLoadedDSP(); updateStats(); renderWaveList(); renderWaveProgress(); updateCountdown(); loadScanData();
+
+    // ★ Load offline queue from localStorage
+    loadOfflineQueue();
+        loadScanCounts();
+    updateUploadTimeDisplay();
+    // ★ Set initial online state
+    isOnline = navigator.onLine;
+    updateQueueUI();
+
+    // ★ Start queue flush timer
+    startQueueFlushTimer();
+
+    var deviceEl = document.getElementById('deviceIndicator');
+    if (deviceEl) deviceEl.textContent = '📱 ' + DEVICE_NAME;
+
+    document.getElementById('dataBadge').textContent = '⏳ Syncing...';
+    document.getElementById('dataBadge').className = 'dbadge syncing';
+
+    // Fetch cloud data
+    loadFromCloud().then(function(cloud) {
+        if (cloud && cloud.badges && Object.keys(cloud.badges).length > 0) {
+            var cloudHash = simpleHash(JSON.stringify(cloud.badges));
+            var cloudCount = Object.keys(cloud.badges).length;
+
+            if (cloudHash !== lastCloudHash) {
+                BADGE_MAP = JSON.parse(JSON.stringify(cloud.badges));
+                lastCloudHash = cloudHash;
+                var today = new Date().toISOString().split('T')[0];
+                localStorage.setItem('dnw1_badge_data', JSON.stringify(BADGE_MAP));
+                localStorage.setItem('dnw1_data_date', today);
+                if (cloud.version) localStorage.setItem('dnw1_data_version', String(cloud.version));
+                rebuildWaves(); sanitizeLoadedDSP(); updateStats(); renderWaveList(); renderWaveProgress();
+                showToast('☁️ Loaded ' + cloudCount + ' drivers from cloud', 'success');
+            }
+
+            // Pull scans from cloud
+            var today2 = new Date().toISOString().split('T')[0];
+            if (cloud.scans && cloud.scans.date === today2) {
+                var cloudScans = cloud.scans.scannedBadges || {};
+               var newFromCloud = 0;
+Object.keys(cloudScans).forEach(function(badge) {
+    if (!scannedBadges[badge]) {
+        scannedBadges[badge] = {
+            device: cloudScans[badge].device || 'unknown',
+            deviceName: cloudScans[badge].deviceName || '?',
+            time: cloudScans[badge].time || ''
+        };
+        newFromCloud++;
+    }
+});
+                lastScanHash = simpleHash(JSON.stringify(cloudScans));
+                if (newFromCloud > 0) {
+                    saveScanData(); renderWaveProgress(); updateStats();
+                    showToast('📡 Pulled ' + newFromCloud + ' scans from other devices', 'success');
+                }
+                if (cloud.scans.devices) updateDeviceIndicator(cloud.scans.devices);
+            }
+
+                      var displayDate = (cloud.uploadedAt || new Date().toISOString()).substring(0, 10);
+            document.getElementById('dataBadge').textContent = '☁️ ' + displayDate;
+            document.getElementById('dataBadge').className = 'dbadge on';
+
+            if (cloud.uploadedAt) {
+                var localUploadTime = getUploadTime();
+                var cloudTime = new Date(cloud.uploadedAt).getTime();
+                var localTime = localUploadTime ? new Date(localUploadTime).getTime() : 0;
+                if (cloudTime > localTime) {
+                    localStorage.setItem(UPLOAD_TIME_KEY, cloud.uploadedAt);
+                    if (cloud.uploadedBy) localStorage.setItem(UPLOAD_DEVICE_NAME_KEY, cloud.uploadedBy);
+                    if (cloud.uploadedByDevice) localStorage.setItem(UPLOAD_DEVICE_KEY, cloud.uploadedByDevice);
+                }
+            }
+            updateUploadTimeDisplay();
+        } else {
+            var savedDate = localStorage.getItem('dnw1_data_date');
+            if (savedDate) {
+                document.getElementById('dataBadge').textContent = '📱 ' + savedDate;
+                document.getElementById('dataBadge').className = 'dbadge on';
+            } else {
+                document.getElementById('dataBadge').textContent = 'Default Data';
+                document.getElementById('dataBadge').className = 'dbadge';
+            }
+        }
+
+        // Send initial heartbeat
+        sendHeartbeat();
+
+        // ★ Flush any queued offline scans now that we're connected
+        if (navigator.onLine && offlineQueue.length > 0) {
+            console.log('[INIT] Found ' + offlineQueue.length + ' queued scans, flushing...');
+            setTimeout(flushOfflineQueue, 2000);
+        }
+    }).catch(function() {
+        document.getElementById('dataBadge').textContent = '📱 Offline';
+        document.getElementById('dataBadge').className = 'dbadge';
+        // ★ Update UI to show offline state
+        isOnline = false;
+        updateQueueUI();
+    });
+
+    // Auto-sync every 10 seconds (badges + scans) — only when online
+    setInterval(function() {
+        if (navigator.onLine) checkForUpdates();
+    }, 10000);
+
+    // Heartbeat every 30 seconds — only when online
+    setInterval(function() {
+        if (navigator.onLine) sendHeartbeat();
+    }, 30000);
+
+    // ★ Periodic connectivity check — detect "lie-fi" (connected but no internet)
+    setInterval(function() {
+        var wasOnline = isOnline;
+        // Quick fetch to check real connectivity
+        fetch('https://api.open-meteo.com/v1/forecast?latitude=0&longitude=0&current_weather=true', {
+            method: 'HEAD',
+            mode: 'no-cors',
+            cache: 'no-store'
+        }).then(function() {
+            if (!wasOnline) {
+                console.log('[NETWORK] Connectivity restored (lie-fi check)');
+                isOnline = true;
+                updateQueueUI();
+                if (offlineQueue.length > 0) {
+                    showToast('🔄 Connection restored! Syncing ' + offlineQueue.length + ' scans...', 'success');
+                    setTimeout(flushOfflineQueue, 1000);
+                }
+            }
+        }).catch(function() {
+            // Can't reach — might be lie-fi
+            if (wasOnline && !navigator.onLine) {
+                isOnline = false;
+                updateQueueUI();
+            }
+        });
+    }, 15000);
+}
+// ============================================================
+// LAST UPLOAD TIME TRACKING
+// ============================================================
+var UPLOAD_TIME_KEY = 'dnw1_upload_time';
+var UPLOAD_DEVICE_KEY = 'dnw1_upload_device';
+var UPLOAD_DEVICE_NAME_KEY = 'dnw1_upload_device_name';
+
+function saveUploadTime() {
+    var now = new Date().toISOString();
+    localStorage.setItem(UPLOAD_TIME_KEY, now);
+    localStorage.setItem(UPLOAD_DEVICE_KEY, DEVICE_ID);
+    localStorage.setItem(UPLOAD_DEVICE_NAME_KEY, DEVICE_NAME);
+    return now;
+}
+
+function getUploadTime() {
+    return localStorage.getItem(UPLOAD_TIME_KEY) || null;
+}
+
+function getUploadDevice() {
+    return localStorage.getItem(UPLOAD_DEVICE_NAME_KEY) || localStorage.getItem(UPLOAD_DEVICE_KEY) || null;
+}
+
+function formatRelativeTime(isoString) {
+    if (!isoString) return { text: 'Never', cls: 'none', full: 'No upload recorded' };
+    var then = new Date(isoString);
+    var now = new Date();
+    var diffMs = now - then;
+    var diffSec = Math.floor(diffMs / 1000);
+    var diffMin = Math.floor(diffSec / 60);
+    var diffHour = Math.floor(diffMin / 60);
+    var diffDay = Math.floor(diffHour / 24);
+    var thenDate = then.toISOString().split('T')[0];
+    var todayDate = now.toISOString().split('T')[0];
+    var timeStr = String(then.getHours()).padStart(2,'0') + ':' + String(then.getMinutes()).padStart(2,'0');
+    var dateStr = String(then.getDate()).padStart(2,'0') + '.' + String(then.getMonth()+1).padStart(2,'0') + '.' + then.getFullYear();
+    var fullStr = dateStr + ' um ' + timeStr + ' Uhr';
+    var cls, text;
+    if (diffSec < 60) { text = 'Just now'; cls = 'recent'; }
+    else if (diffMin < 60) { text = diffMin + 'min ago'; cls = 'recent'; }
+    else if (diffHour < 2 && thenDate === todayDate) { text = diffHour + 'h ' + (diffMin % 60) + 'min ago'; cls = 'today'; }
+    else if (thenDate === todayDate) { text = 'Today ' + timeStr; cls = 'today'; }
+    else if (diffDay === 1) { text = 'Yesterday ' + timeStr; cls = 'old'; }
+    else if (diffDay < 7) { var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; text = days[then.getDay()] + ' ' + timeStr; cls = 'old'; }
+    else { text = dateStr; cls = 'stale'; }
+    return { text: text, cls: cls, full: fullStr };
+}
+
+function updateUploadTimeDisplay() {
+    var chip = document.getElementById('uploadTimeChip');
+    var chipText = document.getElementById('uploadTimeText');
+    var infoBar = document.getElementById('uploadInfoBar');
+    var infoTime = document.getElementById('uploadInfoTime');
+    var infoDevice = document.getElementById('uploadInfoDevice');
+    var infoRelative = document.getElementById('uploadInfoRelative');
+    var infoCount = document.getElementById('uploadInfoCount');
+    var infoWaves = document.getElementById('uploadInfoWaves');
+    var uploadTime = getUploadTime();
+    var uploadDevice = getUploadDevice();
+    var rel = formatRelativeTime(uploadTime);
+    if (chip && chipText) {
+        chipText.textContent = rel.text;
+        chip.className = 'upload-time-chip ' + rel.cls;
+        chip.title = 'Last upload: ' + rel.full + (uploadDevice ? '\nBy: ' + uploadDevice : '');
+    }
+    if (infoBar) {
+        if (uploadTime) {
+            infoBar.style.display = 'block';
+            var dt = new Date(uploadTime);
+            var formattedDate = String(dt.getDate()).padStart(2,'0') + '.' + String(dt.getMonth()+1).padStart(2,'0') + '.' + dt.getFullYear() + ' — ' + String(dt.getHours()).padStart(2,'0') + ':' + String(dt.getMinutes()).padStart(2,'0') + ':' + String(dt.getSeconds()).padStart(2,'0');
+            if (infoTime) infoTime.textContent = formattedDate;
+            if (infoDevice) infoDevice.textContent = uploadDevice || 'Unknown';
+            if (infoRelative) {
+                infoRelative.textContent = rel.text;
+                infoRelative.style.color = rel.cls === 'recent' || rel.cls === 'today' ? 'var(--green)' : rel.cls === 'old' ? 'var(--accent)' : 'var(--red)';
+            }
+        } else { infoBar.style.display = 'none'; }
+    }
+    if (infoCount) infoCount.textContent = Object.keys(BADGE_MAP).length;
+    if (infoWaves) infoWaves.textContent = WAVES.length;
+}
+
+setInterval(updateUploadTimeDisplay, 30000);
+
+// ============================================================
+// ★★★ FULLSCREEN SCAN MODE ★★★
+// ============================================================
+var fsMode = false;
+var fsScanTimeout = null;
+var fsScanInput = document.getElementById('fsScanInput');
+var fsClockInterval = null;
+
+function enterFullscreen() {
+    fsMode = true;
+    document.getElementById('fsOverlay').classList.add('show');
+    scanInput.blur();
+
+    // Focus the fullscreen input
+    setTimeout(function() { fsScanInput.focus(); }, 200);
+    setTimeout(function() { fsScanInput.focus(); }, 500);
+
+    // Start clock
+    updateFsClock();
+    fsClockInterval = setInterval(updateFsClock, 1000);
+
+    // Update wave info
+    updateFsWaveInfo();
+
+    // Update progress
+    updateFsProgress();
+
+    // Update recent scans
+    updateFsRecent();
+
+    // Try real fullscreen
+    try {
+        var el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+        else if (el.msRequestFullscreen) el.msRequestFullscreen();
+    } catch(e) {}
+
+    showToast('🖥️ Fullscreen mode — press ESC to exit', 'success');
+}
+
+function exitFullscreen() {
+    fsMode = false;
+    document.getElementById('fsOverlay').classList.remove('show');
+    if (fsClockInterval) clearInterval(fsClockInterval);
+
+    // Exit real fullscreen
+    try {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+    } catch(e) {}
+
+    // Refocus main scanner
+    setTimeout(function() { scanInput.focus(); }, 200);
+}
+
+function updateFsClock() {
+    document.getElementById('fsClock').textContent = nowStr();
+}
+
+function updateFsWaveInfo() {
+    var c = curWave();
+    var nameEl = document.getElementById('fsWaveName');
+    var timeEl = document.getElementById('fsWaveTime');
+    var dirEl = document.getElementById('fsWaveDir');
+
+    if (c && c !== 'finished') {
+        nameEl.textContent = '🔥 ' + c.name;
+        timeEl.textContent = c.display;
+        var dir = getDirection(c.name);
+        if (dir.dir) {
+            dirEl.style.display = 'inline-block';
+            dirEl.className = 'fs-wave-dir ' + dir.dir;
+            dirEl.textContent = dir.dir === 'links' ? '⬅️ LINKS' : '➡️ RECHTS';
+        } else {
+            dirEl.style.display = 'none';
+        }
+    } else if (c === 'finished') {
+        nameEl.textContent = '✅ All Waves Done';
+        timeEl.textContent = '';
+        dirEl.style.display = 'none';
+    } else {
+        nameEl.textContent = '⏳ Waiting...';
+        timeEl.textContent = WAVES.length > 0 ? 'Next: ' + WAVES[0].name + ' @ ' + WAVES[0].display : '';
+        dirEl.style.display = 'none';
+    }
+}
+
+function updateFsProgress() {
+    var c = curWave();
+    var waveName = (c && c !== 'finished') ? c.name : (WAVES.length > 0 ? WAVES[WAVES.length - 1].name : '');
+    if (!waveName) return;
+
+    var total = 0, scanned = 0, missing = [];
+    Object.entries(BADGE_MAP).forEach(function(e) {
+        if (e[1].wave === waveName) {
+            total++;
+            if (scannedBadges[e[0]]) scanned++;
+            else missing.push(e);
+        }
+    });
+
+    var pct = total > 0 ? Math.round((scanned / total) * 100) : 0;
+    document.getElementById('fsProgressText').innerHTML = '<strong>' + scanned + '</strong> / ' + total + ' scanned (' + pct + '%)';
+
+    var fillEl = document.getElementById('fsProgressFill');
+    fillEl.style.width = pct + '%';
+    fillEl.className = 'fs-progress-fill ' + (pct === 100 ? 'full' : pct >= 70 ? 'high' : pct >= 30 ? 'mid' : 'low');
+
+    // Missing drivers
+    var missingEl = document.getElementById('fsMissing');
+    if (missing.length > 0 && missing.length <= 10) {
+        missingEl.classList.add('show');
+        document.getElementById('fsMissingText').textContent = '⚠️ ' + missing.length + ' driver' + (missing.length !== 1 ? 's' : '') + ' still missing';
+        var names = missing.slice(0, 5).map(function(m) { return m[0] + ' (' + (m[1].route || '?') + ')'; }).join(' • ');
+        document.getElementById('fsMissingSub').textContent = names;
+    } else if (missing.length === 0 && total > 0) {
+        missingEl.classList.add('show');
+        document.getElementById('fsMissingText').textContent = '🏆 All drivers scanned!';
+        document.getElementById('fsMissingSub').textContent = waveName + ' complete';
+        missingEl.style.background = 'rgba(0,196,140,0.08)';
+        missingEl.style.borderColor = 'rgba(0,196,140,0.15)';
+        document.getElementById('fsMissingText').style.color = 'var(--green)';
+    } else {
+        missingEl.classList.remove('show');
+    }
+}
+
+function updateFsRecent() {
+    var list = document.getElementById('fsRecentList');
+    var recent = scanLog.slice(0, 5);
+    if (recent.length === 0) {
+        list.innerHTML = '<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px">No scans yet</div>';
+        return;
+    }
+    list.innerHTML = '';
+    recent.forEach(function(e) {
+        var dirHtml = '';
+        if (e.dir && e.dir.dir) dirHtml = e.dir.dir === 'links' ? '⬅️' : '➡️';
+        var div = document.createElement('div');
+        div.className = 'fs-recent-item';
+        div.innerHTML =
+            '<span class="fs-recent-badge">' + (e.found ? '✅' : '❌') + ' ' + e.badge + '</span>' +
+            '<span class="fs-recent-route">' + (e.wave || '--') + '</span>' +
+            '<span class="fs-recent-dir">' + dirHtml + '</span>' +
+            '<span class="fs-recent-time">' + e.time + '</span>';
+        list.appendChild(div);
+    });
+}
+
+function processFsScan(badgeStr) {
+    // Use the same logic as main scanner
+    processScan(badgeStr);
+
+    // Now update fullscreen display
+    var b1 = badgeStr.trim(), b2 = b1.replace(/^0+/, '') || b1, b3 = b1.replace(/\.0$/, '');
+    var driver = BADGE_MAP[b1] || BADGE_MAP[b2] || BADGE_MAP[b3];
+    var badge = driver ? (BADGE_MAP[b1] ? b1 : BADGE_MAP[b2] ? b2 : b3) : b2;
+
+    var resultEl = document.getElementById('fsResult');
+    var dirEl = document.getElementById('fsDirection');
+    var infoEl = document.getElementById('fsInfo');
+
+    if (driver) {
+        var direction = getDirection(driver.wave);
+
+        // Hero
+        document.getElementById('fsResultHero').className = 'fs-result-hero ok';
+                var fsScanInfo = scanCounts[badge] || { count: 0, times: [], devices: [] };
+        showDupWarning(badge, fsScanInfo, driver);
+        document.getElementById('fsResultWave').textContent = formatWave(driver.wave) || 'Assigned';
+        document.getElementById('fsResultTime').textContent = timeStr(driver.t);
+
+        // Direction
+        if (direction.dir) {
+            dirEl.className = 'fs-direction show ' + direction.dir;
+            if (direction.dir === 'links') {
+                document.getElementById('fsDirectionText').textContent = '⬅️👈 FAHR NACH LINKS 👈⬅️';
+            } else {
+                document.getElementById('fsDirectionText').textContent = '➡️👉 FAHR NACH RECHTS 👉➡️';
+            }
+            document.getElementById('fsDirectionSub').textContent =
+                (driver.route || '--') + ' • ' + (driver.loc || '--') + ' • ' + (driver.dsp || '--');
+        } else {
+            dirEl.className = 'fs-direction';
+        }
+
+        // Info grid
+        infoEl.style.display = 'grid';
+        document.getElementById('fsBadge').textContent = badge;
+        document.getElementById('fsRoute').textContent = driver.route || '--';
+        document.getElementById('fsLoc').textContent = driver.loc || '--';
+        var displayDsp = driver.dsp || '';
+        if (/^A[A-Za-z0-9]{8,}$/.test(displayDsp)) displayDsp = '';
+        document.getElementById('fsDSP').textContent = displayDsp || '--';
+
+    } else {
+        document.getElementById('fsResultHero').className = 'fs-result-hero fail';
+        document.getElementById('fsResultWave').textContent = '❌ NOT FOUND';
+        document.getElementById('fsResultTime').textContent = badge;
+        dirEl.className = 'fs-direction';
+        infoEl.style.display = 'none';
+    }
+
+    resultEl.className = 'fs-result show';
+
+    // Update everything
+    updateFsProgress();
+    updateFsRecent();
+    updateFsWaveInfo();
+
+    // Clear input
+    setTimeout(function() { fsScanInput.value = ''; fsScanInput.focus(); }, 100);
+}
+
+// Fullscreen scanner input handler
+fsScanInput.addEventListener('input', function() {
+    clearTimeout(fsScanTimeout);
+    fsScanTimeout = setTimeout(function() {
+        var v = fsScanInput.value.trim();
+        if (v.length >= 3) processFsScan(v);
+    }, 300);
+});
+
+fsScanInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        clearTimeout(fsScanTimeout);
+        var v = fsScanInput.value.trim();
+        if (v.length >= 3) processFsScan(v);
+    }
+    if (e.key === 'Escape') {
+        exitFullscreen();
+    }
+});
+
+// Keep focus on fullscreen input
+fsScanInput.addEventListener('blur', function() {
+    if (fsMode) {
+        setTimeout(function() {
+            if (fsMode && !isAnyModalOpen()) fsScanInput.focus();
+        }, 100);
+    }
+});
+
+// ESC key handler (also works for real fullscreen exit)
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && fsMode) {
+        exitFullscreen();
+    }
+    // F11 to enter fullscreen mode
+    if (e.key === 'F11') {
+        e.preventDefault();
+        if (fsMode) exitFullscreen();
+        else enterFullscreen();
+    }
+});
+
+// Update fullscreen wave info periodically
+setInterval(function() {
+    if (fsMode) {
+        updateFsWaveInfo();
+        updateFsProgress();
+    }
+}, 10000);
+// ============================================================
+// ★★★ DUPLICATE SCAN TRACKING ★★★
+// ============================================================
+var scanCounts = {};
+
+function loadScanCounts() {
+    try {
+        var saved = localStorage.getItem('dnw1_scan_counts');
+        if (!saved) return;
+        var data = JSON.parse(saved);
+        var today = new Date().toISOString().split('T')[0];
+        if (data.date === today) {
+            scanCounts = data.counts || {};
+        } else {
+            localStorage.removeItem('dnw1_scan_counts');
+            scanCounts = {};
+        }
+    } catch(e) { scanCounts = {}; }
+}
+
+function saveScanCounts() {
+    try {
+        localStorage.setItem('dnw1_scan_counts', JSON.stringify({
+            date: new Date().toISOString().split('T')[0],
+            counts: scanCounts
+        }));
+    } catch(e) {}
+}
+
+function trackScan(badge) {
+    if (!scanCounts[badge]) {
+        scanCounts[badge] = { count: 0, times: [], devices: [] };
+    }
+    scanCounts[badge].count++;
+    scanCounts[badge].times.push(nowStr());
+    scanCounts[badge].devices.push(DEVICE_NAME || DEVICE_ID);
+    saveScanCounts();
+    return scanCounts[badge];
+}
+
+function showDupWarning(badge, scanInfo, driver) {
+    var count = scanInfo.count;
+    var el = document.getElementById('dupWarning');
+    var fsEl = document.getElementById('fsDupWarning');
+
+    if (count <= 1) {
+        el.classList.remove('show');
+        if (fsEl) fsEl.classList.remove('show');
+        return;
+    }
+
+    var wave = driver ? driver.wave : 'Unbekannt';
+    var route = driver ? (driver.route || '--') : '--';
+    var loc = driver ? (driver.loc || '--') : '--';
+
+    document.getElementById('dupCount').textContent = count + 'x gescannt';
+    document.getElementById('dupInfo').innerHTML =
+        '⚠️ Badge <strong>' + badge + '</strong> wurde bereits <strong>' + (count - 1) + 'x</strong> vorher gescannt!<br>' +
+        '📋 ' + wave + ' • ' + route + ' • ' + loc;
+
+    var prevTimes = scanInfo.times.slice(0, -1);
+    var prevDevices = scanInfo.devices.slice(0, -1);
+    var historyLines = [];
+    for (var i = 0; i < prevTimes.length; i++) {
+        var deviceName = prevDevices[i] || '?';
+        var myNameLower = (DEVICE_NAME || '').toLowerCase().trim();
+        var isMe = deviceName.toLowerCase().trim() === myNameLower;
+        historyLines.push('🕐 ' + prevTimes[i] + ' — ' + (isMe ? deviceName + ' (Du)' : deviceName));
+    }
+    document.getElementById('dupDevice').innerHTML =
+        '<strong>Vorherige Scans:</strong><br>' + historyLines.join('<br>');
+
+    el.classList.add('show');
+
+    if (fsEl) {
+        document.getElementById('fsDupTitle').textContent = '⚠️ BEREITS ' + count + 'x GESCANNT!';
+        document.getElementById('fsDupInfo').innerHTML =
+            'Badge <strong>' + badge + '</strong> — zuletzt um ' + prevTimes[prevTimes.length - 1] +
+            ' von ' + prevDevices[prevDevices.length - 1];
+        fsEl.classList.add('show');
+    }
+
+    if (voiceEnabled && count === 2) {
+        setTimeout(function() {
+            speak('Achtung! Bereits gescannt!', 'de-DE');
+        }, 1500);
+    }
+}
+
+function hideDupWarning() {
+    document.getElementById('dupWarning').classList.remove('show');
+    var fsEl = document.getElementById('fsDupWarning');
+    if (fsEl) fsEl.classList.remove('show');
+}
+loadData();
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+        regs.forEach(function(reg) { reg.update() });
+    });
+    navigator.serviceWorker.register('./sw.js')
+        .then(function(reg) {
+            console.log('SW registered');
+            setInterval(function() { reg.update() }, 300000);
+        })
+        .catch(function(err) { console.log('SW failed', err) });
+}
+</script>
+</body>
+</html>
